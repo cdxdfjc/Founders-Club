@@ -362,7 +362,7 @@ export default async function ImpostazioniPage() {
           </a>
           .
         </p>
-        <DeleteAccountButton username={profile.username} />
+        <DeleteAccountButton email={user.email ?? ""} />
       </Section>
     </div>
   );

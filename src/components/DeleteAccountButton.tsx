@@ -3,11 +3,11 @@
 import { useState } from "react";
 import { deleteMyAccount } from "@/lib/actions/profile";
 
-export function DeleteAccountButton({ username }: { username: string }) {
+export function DeleteAccountButton({ email }: { email: string }) {
   const [open, setOpen] = useState(false);
   const [confirm, setConfirm] = useState("");
 
-  const canDelete = confirm === username;
+  const canDelete = confirm.trim().toLowerCase() === email.toLowerCase();
 
   if (!open) {
     return (
@@ -38,15 +38,16 @@ export function DeleteAccountButton({ username }: { username: string }) {
           legato al tuo account. Non potremo recuperarli.
         </p>
         <p className="text-sm text-ink/70">
-          Per confermare, scrivi qui sotto il tuo username{" "}
-          <span className="font-mono font-semibold">{username}</span>:
+          Per confermare, scrivi qui sotto l&apos;email del tuo account{" "}
+          <span className="font-mono font-semibold">{email}</span>:
         </p>
         <input
           name="confirm"
+          type="email"
           value={confirm}
           onChange={(e) => setConfirm(e.target.value)}
           className="field"
-          placeholder={username}
+          placeholder={email}
           autoComplete="off"
         />
         <div className="flex items-center gap-2 pt-1">

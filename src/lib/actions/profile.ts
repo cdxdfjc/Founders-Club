@@ -155,13 +155,13 @@ export async function deleteMyAccount(formData: FormData): Promise<void> {
   const { supabase, user } = await requireUser();
 
   const confirm = str(formData.get("confirm"));
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("username")
-    .eq("id", user.id)
-    .maybeSingle();
+  const userEmail = user.email ?? null;
 
-  if (!profile || confirm !== profile.username) {
+  if (
+    !userEmail ||
+    !confirm ||
+    confirm.toLowerCase() !== userEmail.toLowerCase()
+  ) {
     redirect("/impostazioni?error=confirm_mismatch");
   }
 
