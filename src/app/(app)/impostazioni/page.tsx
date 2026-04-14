@@ -3,12 +3,13 @@ import { createClient } from "@/lib/supabase/server";
 import {
   updateProfile,
   updateContacts,
-  addProject,
   updateProject,
   deleteProject,
   updateEmail,
   updatePassword,
 } from "@/lib/actions/profile";
+import { NewUserProjectForm } from "@/components/NewUserProjectForm";
+import { DeleteAccountButton } from "@/components/DeleteAccountButton";
 
 export default async function ImpostazioniPage() {
   const supabase = await createClient();
@@ -295,73 +296,8 @@ export default async function ImpostazioniPage() {
             </p>
           )}
 
-          {/* Aggiungi nuovo */}
-          <form
-            action={addProject}
-            className="card !rounded-2xl p-5 space-y-3 border-dashed"
-            style={{ borderStyle: "dashed", borderColor: "rgba(137,161,239,0.4)" }}
-          >
-            <div className="flex items-center gap-2 mb-1">
-              <span>➕</span>
-              <span className="font-display font-semibold text-sm text-ink/70">
-                Nuovo progetto
-              </span>
-            </div>
-            <input
-              name="name"
-              className="field"
-              placeholder="Nome del progetto"
-              required
-              maxLength={80}
-            />
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <select name="status" defaultValue="in_corso" className="field">
-                <option value="in_corso">🟢 In corso</option>
-                <option value="completato">✅ Completato</option>
-                <option value="chiuso">🔴 Chiuso</option>
-              </select>
-              <input
-                name="year_start"
-                type="number"
-                min={1970}
-                max={2100}
-                className="field"
-                placeholder="Anno inizio"
-              />
-              <input
-                name="year_end"
-                type="number"
-                min={1970}
-                max={2100}
-                className="field"
-                placeholder="Anno fine"
-              />
-            </div>
-            <input
-              name="revenue_note"
-              className="field"
-              placeholder="💰 Risultati (opzionale)"
-              maxLength={120}
-            />
-            <textarea
-              name="description"
-              className="field resize-y min-h-[70px]"
-              placeholder="Descrizione breve (opzionale)"
-              rows={2}
-              maxLength={300}
-            />
-            <input
-              name="url"
-              type="url"
-              className="field"
-              placeholder="URL (opzionale)"
-            />
-            <div className="pt-1">
-              <button type="submit" className="btn-gradient !py-2.5 !px-5 !text-sm">
-                Aggiungi progetto
-              </button>
-            </div>
-          </form>
+          {/* Aggiungi nuovo — con AI helper */}
+          <NewUserProjectForm />
         </div>
       </Section>
 
@@ -415,16 +351,18 @@ export default async function ImpostazioniPage() {
       {/* DANGER ZONE */}
       <Section emoji="⚠️" title="Zona pericolosa">
         <p className="text-sm text-ink/60">
-          Vuoi eliminare il tuo account e tutti i tuoi contenuti? Scrivici a{" "}
+          Eliminare l&apos;account cancella in modo definitivo profilo,
+          progetti, post e tutti i contenuti collegati. L&apos;operazione non
+          può essere annullata. In caso di dubbi puoi scriverci a{" "}
           <a
             href="mailto:ciao@foundersclub.it"
             className="font-semibold gradient-text hover:underline"
           >
             ciao@foundersclub.it
-          </a>{" "}
-          — lo facciamo manualmente per essere sicuri di non cancellare nulla
-          per sbaglio.
+          </a>
+          .
         </p>
+        <DeleteAccountButton username={profile.username} />
       </Section>
     </div>
   );

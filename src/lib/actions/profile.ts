@@ -150,3 +150,27 @@ export async function updatePassword(formData: FormData): Promise<void> {
   await supabase.auth.updateUser({ password });
   revalidatePath("/impostazioni");
 }
+
+export async function deleteMyAccount(formData: FormData): Promise<void> {
+  const { supabase, user } = await requireUser();
+
+  const confirm = str(formData.get("confirm"));
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("username")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (!profile || confirm !== profile.username) {
+    redirect("/impostazioni?error=confirm_mismatch");
+  }
+
+  const { error } = await supabase.rpc("delete_my_account");
+  if (error) {
+    console.error("[deleteMyAccount]", error.message);
+    redirect("/impostazioni?error=delete_failed");
+  }
+
+  await supabase.auth.signOut();
+  redirect("/?deleted=1");
+}

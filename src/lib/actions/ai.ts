@@ -5,6 +5,83 @@ import { createClient } from "@/lib/supabase/server";
 import { openaiJSON } from "@/lib/ai/openai";
 import { STAGES } from "@/lib/projects";
 
+export type UserProjectDraft = {
+  name: string;
+  description: string;
+  revenue_note: string;
+  status: "in_corso" | "completato" | "chiuso";
+};
+
+export async function assistUserProject(
+  rawText: string,
+): Promise<
+  | { ok: true; draft: UserProjectDraft }
+  | { ok: false; error: string }
+> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const text = (rawText ?? "").trim();
+  if (text.length < 15) {
+    return {
+      ok: false,
+      error: "Scrivi almeno 15 caratteri sul progetto per farmi capire di cosa si tratta.",
+    };
+  }
+  if (text.length > 2000) {
+    return { ok: false, error: "Testo troppo lungo. Massimo 2000 caratteri." };
+  }
+
+  const system = `Sei un assistente che aiuta founder italiani a descrivere progetti sul loro profilo personale.
+
+L'utente ti dà del testo grezzo (note, pensieri buttati) su un progetto che ha fatto, sta facendo o ha chiuso. Tu lo trasformi in 4 campi strutturati per una card di profilo.
+
+Rispondi SEMPRE in italiano. Tono caldo, concreto, onesto. Mai gergo aziendale, mai marketing-bullshit, mai hype. Non inventare numeri, nomi o fatti che non sono nel testo originale.
+
+Regole sui campi:
+- "name": nome del progetto, max 60 caratteri. Se il testo lo contiene, usa quello. Se non c'è un nome esplicito, proponine uno breve basato su cosa fa.
+- "description": 2-4 frasi che spiegano cosa fa il progetto, a chi serve, e (se l'utente lo menziona) in che fase è o cosa ha imparato. Max 280 caratteri. Riformula in modo chiaro ma resta fedele al contenuto. Niente numeri inventati.
+- "revenue_note": riassunto dei risultati/numeri menzionati nel testo (es. "2k MRR", "100 utenti", "exit €50k", "1M views"). Se non ci sono numeri nel testo, rispondi con stringa vuota. MAI inventarne.
+- "status": scegli UNO tra "in_corso" (ci sto ancora lavorando), "completato" (è live e funziona), "chiuso" (ho smesso/venduto/pivotato). Inferisci dal tono del testo. Se ambiguo, usa "in_corso".`;
+
+  const userPrompt = `Ecco quello che mi ha scritto:\n\n"""\n${text}\n"""`;
+
+  const schema = {
+    type: "object",
+    additionalProperties: false,
+    properties: {
+      name: { type: "string" },
+      description: { type: "string" },
+      revenue_note: { type: "string" },
+      status: {
+        type: "string",
+        enum: ["in_corso", "completato", "chiuso"],
+      },
+    },
+    required: ["name", "description", "revenue_note", "status"],
+  };
+
+  try {
+    const draft = await openaiJSON<UserProjectDraft>({
+      system,
+      user: userPrompt,
+      schema,
+      schemaName: "user_project_draft",
+    });
+    return { ok: true, draft };
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "Errore sconosciuto";
+    console.error("[assistUserProject]", msg);
+    return {
+      ok: false,
+      error: "L'assistente AI non ha risposto. Riprova tra un attimo.",
+    };
+  }
+}
+
 export type ProjectDraft = {
   title: string;
   tagline: string;
