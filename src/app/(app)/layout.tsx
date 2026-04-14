@@ -7,11 +7,11 @@ import { BackToFeed } from "@/components/BackToFeed";
 
 const NAV = [
   { href: "/progetti", label: "Progetti", emoji: "💡" },
-  { href: "/bar", label: "Bar", emoji: "🍺" },
   { href: "/aiuto", label: "Aiuto", emoji: "🙋" },
   { href: "/mentor", label: "Mentor", emoji: "✨" },
   { href: "/risorse", label: "Risorse", emoji: "📚" },
   { href: "/eventi", label: "Meetup", emoji: "☕" },
+  { href: "/bar", label: "Bar", emoji: "🍺" },
 ];
 
 export default async function AppLayout({
