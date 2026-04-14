@@ -18,7 +18,7 @@ export default async function ProfilePage({
   const { data: profile } = await supabase
     .from("profiles")
     .select(
-      "id, username, full_name, bio, city, age, occupation, avatar_url, contact_email, contact_telegram, contact_linkedin, contact_twitter, contact_website, is_mentor",
+      "id, username, full_name, bio, city, age, occupation, avatar_url, contact_email, contact_telegram, contact_linkedin, contact_twitter, contact_instagram, contact_website, is_mentor",
     )
     .eq("username", username)
     .maybeSingle();
@@ -134,16 +134,19 @@ export default async function ProfilePage({
             emoji="🟢"
             title="In corso"
             projects={inCorso}
+            isOwner={isOwnProfile}
           />
           <ProjectGroup
             emoji="✅"
             title="Completati"
             projects={completati}
+            isOwner={isOwnProfile}
           />
           <ProjectGroup
             emoji="🔴"
             title="Chiusi"
             projects={chiusi}
+            isOwner={isOwnProfile}
           />
         </section>
       )}
@@ -190,10 +193,12 @@ function ProjectGroup({
   emoji,
   title,
   projects,
+  isOwner,
 }: {
   emoji: string;
   title: string;
   projects: ProjectRow[];
+  isOwner: boolean;
 }) {
   if (projects.length === 0) return null;
   return (
@@ -207,7 +212,7 @@ function ProjectGroup({
       </h2>
       <div className="grid sm:grid-cols-2 gap-4">
         {projects.map((p) => (
-          <ProjectCard key={p.id} project={p} />
+          <ProjectCard key={p.id} project={p} isOwner={isOwner} />
         ))}
       </div>
     </div>
@@ -222,6 +227,7 @@ function ContactsBlock({
     contact_telegram: string | null;
     contact_linkedin: string | null;
     contact_twitter: string | null;
+    contact_instagram: string | null;
     contact_website: string | null;
   };
 }) {
@@ -258,6 +264,13 @@ function ContactsBlock({
       value: profile.contact_twitter,
       href: `https://x.com/${profile.contact_twitter.replace(/^@/, "")}`,
       icon: "𝕏",
+    });
+  if (profile.contact_instagram)
+    items.push({
+      label: "Instagram",
+      value: profile.contact_instagram,
+      href: `https://instagram.com/${profile.contact_instagram.replace(/^@/, "")}`,
+      icon: "📸",
     });
   if (profile.contact_website)
     items.push({

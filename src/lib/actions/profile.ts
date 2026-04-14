@@ -68,6 +68,7 @@ export async function updateContacts(formData: FormData): Promise<void> {
       contact_telegram: str(formData.get("contact_telegram")),
       contact_linkedin: str(formData.get("contact_linkedin")),
       contact_twitter: str(formData.get("contact_twitter")),
+      contact_instagram: str(formData.get("contact_instagram")),
       contact_website: str(formData.get("contact_website")),
       updated_at: new Date().toISOString(),
     })

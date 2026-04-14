@@ -4,37 +4,92 @@ import { useState, useTransition } from "react";
 import { assistUserProject } from "@/lib/actions/ai";
 import { addProject } from "@/lib/actions/profile";
 
+type Status = "in_corso" | "completato" | "chiuso";
+
+const EMPTY = {
+  name: "",
+  description: "",
+  revenueNote: "",
+  yearStart: "",
+  yearEnd: "",
+  url: "",
+  status: "in_corso" as Status,
+};
+
 export function NewUserProjectForm() {
+  const [open, setOpen] = useState(false);
   const [showAI, setShowAI] = useState(false);
   const [rawText, setRawText] = useState("");
   const [aiError, setAiError] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [aiPending, startAI] = useTransition();
+  const [savePending, startSave] = useTransition();
 
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [revenueNote, setRevenueNote] = useState("");
-  const [status, setStatus] = useState<"in_corso" | "completato" | "chiuso">(
-    "in_corso",
-  );
+  const [values, setValues] = useState(EMPTY);
+
+  const reset = () => {
+    setValues(EMPTY);
+    setRawText("");
+    setAiError(null);
+    setShowAI(false);
+  };
+
+  const close = () => {
+    reset();
+    setOpen(false);
+  };
 
   const handleGenerate = () => {
     setAiError(null);
-    startTransition(async () => {
+    startAI(async () => {
       const res = await assistUserProject(rawText);
       if (!res.ok) {
         setAiError(res.error);
         return;
       }
-      setName(res.draft.name);
-      setDescription(res.draft.description);
-      setRevenueNote(res.draft.revenue_note);
-      setStatus(res.draft.status);
+      setValues((v) => ({
+        ...v,
+        name: res.draft.name,
+        description: res.draft.description,
+        revenueNote: res.draft.revenue_note,
+        status: res.draft.status,
+      }));
     });
   };
 
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (savePending || !values.name.trim()) return;
+    const fd = new FormData(e.currentTarget);
+    startSave(async () => {
+      await addProject(fd);
+      close();
+    });
+  };
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="card !rounded-2xl p-5 w-full text-left hover:shadow-lg transition"
+        style={{
+          borderStyle: "dashed",
+          borderColor: "rgba(137,161,239,0.4)",
+        }}
+      >
+        <span className="flex items-center gap-2">
+          <span className="text-xl">➕</span>
+          <span className="font-display font-semibold text-sm text-ink/70">
+            Aggiungi un nuovo progetto
+          </span>
+        </span>
+      </button>
+    );
+  }
+
   return (
     <form
-      action={addProject}
+      onSubmit={onSubmit}
       className="card !rounded-2xl p-5 space-y-3"
       style={{ borderStyle: "dashed", borderColor: "rgba(137,161,239,0.4)" }}
     >
@@ -45,13 +100,22 @@ export function NewUserProjectForm() {
             Nuovo progetto
           </span>
         </div>
-        <button
-          type="button"
-          onClick={() => setShowAI((v) => !v)}
-          className="text-xs font-semibold gradient-text hover:underline"
-        >
-          {showAI ? "Nascondi AI ↑" : "✨ Fatti aiutare dall'AI"}
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setShowAI((v) => !v)}
+            className="text-xs font-semibold gradient-text hover:underline"
+          >
+            {showAI ? "Nascondi AI ↑" : "✨ Fatti aiutare dall'AI"}
+          </button>
+          <button
+            type="button"
+            onClick={close}
+            className="text-xs font-semibold text-ink/50 hover:text-ink"
+          >
+            ✕ Chiudi
+          </button>
+        </div>
       </div>
 
       {showAI && (
@@ -64,16 +128,16 @@ export function NewUserProjectForm() {
           }}
         >
           <p className="text-xs text-ink/70 leading-relaxed">
-            Scrivi a ruota libera cos'è il tuo progetto, in che fase sta, cosa
-            hai imparato, quanto ha guadagnato. L'AI ti trasforma il tutto in
-            una card pronta.
+            Scrivi a ruota libera cos&apos;è il tuo progetto, in che fase sta,
+            cosa hai imparato, quanto ha guadagnato. L&apos;AI ti trasforma il
+            tutto in una card pronta.
           </p>
           <textarea
             value={rawText}
             onChange={(e) => setRawText(e.target.value)}
             rows={4}
             className="field resize-y min-h-[90px]"
-            placeholder="Es. Ho fatto un micro-saas che aiuta i freelance italiani a mandare fatture. L'ho lanciato a gennaio 2024, oggi fa circa 2k MRR. Sto valutando se continuarlo o chiuderlo."
+            placeholder="Es. Ho fatto un micro-saas che aiuta i freelance italiani a mandare fatture. L'ho lanciato a gennaio 2024, oggi fa circa 2k MRR."
             maxLength={2000}
           />
           <div className="flex items-center justify-between gap-2">
@@ -87,10 +151,10 @@ export function NewUserProjectForm() {
             <button
               type="button"
               onClick={handleGenerate}
-              disabled={pending || rawText.trim().length < 15}
+              disabled={aiPending || rawText.trim().length < 15}
               className="btn-gradient !py-2 !px-4 !text-xs disabled:opacity-50"
             >
-              {pending ? "Sto pensando…" : "✨ Genera"}
+              {aiPending ? "Sto pensando…" : "✨ Genera"}
             </button>
           </div>
         </div>
@@ -102,16 +166,16 @@ export function NewUserProjectForm() {
         placeholder="Nome del progetto"
         required
         maxLength={80}
-        value={name}
-        onChange={(e) => setName(e.target.value)}
+        value={values.name}
+        onChange={(e) => setValues((v) => ({ ...v, name: e.target.value }))}
       />
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <select
           name="status"
-          value={status}
+          value={values.status}
           onChange={(e) =>
-            setStatus(e.target.value as "in_corso" | "completato" | "chiuso")
+            setValues((v) => ({ ...v, status: e.target.value as Status }))
           }
           className="field"
         >
@@ -126,6 +190,10 @@ export function NewUserProjectForm() {
           max={2100}
           className="field"
           placeholder="Anno inizio"
+          value={values.yearStart}
+          onChange={(e) =>
+            setValues((v) => ({ ...v, yearStart: e.target.value }))
+          }
         />
         <input
           name="year_end"
@@ -134,6 +202,10 @@ export function NewUserProjectForm() {
           max={2100}
           className="field"
           placeholder="Anno fine"
+          value={values.yearEnd}
+          onChange={(e) =>
+            setValues((v) => ({ ...v, yearEnd: e.target.value }))
+          }
         />
       </div>
 
@@ -142,8 +214,10 @@ export function NewUserProjectForm() {
         className="field"
         placeholder="💰 Risultati (opzionale)"
         maxLength={120}
-        value={revenueNote}
-        onChange={(e) => setRevenueNote(e.target.value)}
+        value={values.revenueNote}
+        onChange={(e) =>
+          setValues((v) => ({ ...v, revenueNote: e.target.value }))
+        }
       />
 
       <textarea
@@ -152,8 +226,10 @@ export function NewUserProjectForm() {
         placeholder="Descrizione breve (opzionale)"
         rows={3}
         maxLength={300}
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
+        value={values.description}
+        onChange={(e) =>
+          setValues((v) => ({ ...v, description: e.target.value }))
+        }
       />
 
       <input
@@ -161,11 +237,24 @@ export function NewUserProjectForm() {
         type="url"
         className="field"
         placeholder="URL (opzionale)"
+        value={values.url}
+        onChange={(e) => setValues((v) => ({ ...v, url: e.target.value }))}
       />
 
-      <div className="pt-1">
-        <button type="submit" className="btn-gradient !py-2.5 !px-5 !text-sm">
-          Aggiungi progetto
+      <div className="pt-1 flex items-center gap-3">
+        <button
+          type="submit"
+          disabled={savePending || !values.name.trim()}
+          className="btn-gradient !py-2.5 !px-5 !text-sm disabled:opacity-40"
+        >
+          {savePending ? "Salvataggio…" : "Aggiungi progetto"}
+        </button>
+        <button
+          type="button"
+          onClick={close}
+          className="text-sm font-semibold text-ink/50 hover:text-ink"
+        >
+          Annulla
         </button>
       </div>
     </form>
