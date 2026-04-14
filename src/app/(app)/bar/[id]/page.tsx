@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { addBarReply } from "@/lib/actions/bar";
+import { addBarReply, deleteBarThread } from "@/lib/actions/bar";
+import { DeleteButton } from "@/components/DeleteButton";
 
 function timeAgo(iso: string): string {
   const s = Math.max(1, Math.floor((Date.now() - new Date(iso).getTime()) / 1000));
@@ -24,6 +25,7 @@ type Thread = {
   body: string;
   created_at: string;
   reply_count: number;
+  author_id: string;
   author: Author;
 };
 
@@ -51,7 +53,7 @@ export default async function ThreadPage({
     .from("bar_threads")
     .select(
       `
-      id, title, body, created_at, reply_count,
+      id, title, body, created_at, reply_count, author_id,
       author:profiles!bar_threads_author_id_fkey ( username, full_name )
       `,
     )
@@ -77,6 +79,7 @@ export default async function ThreadPage({
   const authorName =
     thread.author?.full_name ?? thread.author?.username ?? "anonimo";
   const authorInitial = authorName.charAt(0).toUpperCase();
+  const isAuthor = thread.author_id === user.id;
 
   return (
     <div className="max-w-3xl mx-auto rise space-y-6">
@@ -88,21 +91,35 @@ export default async function ThreadPage({
       </Link>
 
       <article className="card p-7 sm:p-8">
-        <div className="flex items-center gap-3 mb-5">
-          <span
-            className="w-11 h-11 rounded-full flex items-center justify-center text-white text-sm font-bold"
-            style={{
-              background: "linear-gradient(135deg, #32CBFF, #89A1EF, #EF9CDA)",
-            }}
-          >
-            {authorInitial}
-          </span>
-          <div className="min-w-0">
-            <div className="font-semibold text-sm">{authorName}</div>
-            <div className="text-xs text-ink/50">
-              {timeAgo(thread.created_at)} fa
+        <div className="flex items-center justify-between gap-3 mb-5">
+          <div className="flex items-center gap-3 min-w-0">
+            <span
+              className="w-11 h-11 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0"
+              style={{
+                background: "linear-gradient(135deg, #32CBFF, #89A1EF, #EF9CDA)",
+              }}
+            >
+              {authorInitial}
+            </span>
+            <div className="min-w-0">
+              <div className="font-semibold text-sm">{authorName}</div>
+              <div className="text-xs text-ink/50">
+                {timeAgo(thread.created_at)} fa
+              </div>
             </div>
           </div>
+
+          {isAuthor && (
+            <DeleteButton
+              action={deleteBarThread}
+              hiddenName="thread_id"
+              hiddenValue={thread.id}
+              confirmText="Sei sicuro di voler eliminare questo thread? Verranno cancellate anche tutte le risposte."
+              className="px-3 py-1.5 rounded-full text-xs font-semibold border border-plum/40 text-plum bg-plum/10 hover:bg-plum/20 transition shrink-0"
+            >
+              🗑️ Elimina
+            </DeleteButton>
+          )}
         </div>
 
         <h1 className="font-display-tight font-semibold text-3xl sm:text-4xl leading-tight tracking-tight">

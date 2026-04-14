@@ -38,6 +38,13 @@ const CARDS = [
     title: "Meetup",
     body: "Incontri di persona in città.",
   },
+  {
+    href: "/bar",
+    emoji: "🍺",
+    color: "#FFB347",
+    title: "Bar",
+    body: "Chiacchiere al bancone con altri founder.",
+  },
 ];
 
 export default async function FeedPage() {
@@ -67,7 +74,7 @@ export default async function FeedPage() {
             Ciao <span className="gradient-text">{firstName}</span> 👋
           </h1>
           <p className="mt-5 text-lg text-ink/70 max-w-xl">
-            Cosa vuoi fare oggi? Scegli una sezione per cominciare.
+            Fallo brutto, ma fallo. ✨
           </p>
         </div>
         <div className="hidden md:block rise" style={{ animationDelay: "0.15s" }}>

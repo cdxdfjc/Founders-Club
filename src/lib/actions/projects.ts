@@ -138,6 +138,23 @@ export async function requestJoin(formData: FormData): Promise<void> {
   revalidatePath(`/progetti/${projectId}`);
 }
 
+export async function deleteProject(formData: FormData): Promise<void> {
+  const { supabase, user } = await requireUser();
+  const projectId = str(formData.get("project_id"));
+  if (!projectId) return;
+
+  const { error } = await supabase
+    .from("projects")
+    .delete()
+    .eq("id", projectId)
+    .eq("owner_id", user.id);
+
+  if (error) return;
+
+  revalidatePath("/progetti");
+  redirect("/progetti");
+}
+
 export async function addComment(formData: FormData): Promise<void> {
   const { supabase, user } = await requireUser();
   const projectId = str(formData.get("project_id"));

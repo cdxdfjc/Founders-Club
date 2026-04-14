@@ -38,6 +38,23 @@ export async function createBarThread(formData: FormData): Promise<void> {
   redirect(`/bar/${data.id}`);
 }
 
+export async function deleteBarThread(formData: FormData): Promise<void> {
+  const { supabase, user } = await requireUser();
+  const threadId = str(formData.get("thread_id"));
+  if (!threadId) return;
+
+  const { error } = await supabase
+    .from("bar_threads")
+    .delete()
+    .eq("id", threadId)
+    .eq("author_id", user.id);
+
+  if (error) return;
+
+  revalidatePath("/bar");
+  redirect("/bar");
+}
+
 export async function addBarReply(formData: FormData): Promise<void> {
   const { supabase, user } = await requireUser();
 

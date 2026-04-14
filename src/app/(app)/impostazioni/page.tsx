@@ -20,7 +20,7 @@ export default async function ImpostazioniPage() {
   const { data: profile } = await supabase
     .from("profiles")
     .select(
-      "id, username, full_name, bio, city, revenue_note, contact_email, contact_telegram, contact_linkedin, contact_twitter, contact_website, is_mentor",
+      "id, username, full_name, bio, city, age, occupation, contact_email, contact_telegram, contact_linkedin, contact_twitter, contact_website, is_mentor",
     )
     .eq("id", user.id)
     .maybeSingle();
@@ -29,8 +29,11 @@ export default async function ImpostazioniPage() {
 
   const { data: projects } = await supabase
     .from("user_projects")
-    .select("id, name, description, url")
+    .select(
+      "id, name, description, url, status, year_start, year_end, revenue_note",
+    )
     .eq("user_id", user.id)
+    .order("year_start", { ascending: false, nullsFirst: false })
     .order("created_at", { ascending: false });
 
   const initial = (profile.full_name ?? profile.username)
@@ -98,6 +101,34 @@ export default async function ImpostazioniPage() {
             />
           </Row>
 
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <Row label="Età" hint="Opzionale">
+              <input
+                name="age"
+                type="number"
+                min={14}
+                max={120}
+                className="field"
+                defaultValue={profile.age ?? ""}
+                placeholder="28"
+              />
+            </Row>
+            <div className="sm:col-span-2">
+              <Row
+                label="Studio / Lavoro"
+                hint="Una riga su cosa studi o di cosa ti occupi."
+              >
+                <input
+                  name="occupation"
+                  className="field"
+                  defaultValue={profile.occupation ?? ""}
+                  placeholder="Es. Product designer @ Acme · Studio ingegneria @ Polimi"
+                  maxLength={120}
+                />
+              </Row>
+            </div>
+          </div>
+
           <Row label="Bio" hint="Cosa fai, cosa stai costruendo, cosa cerchi.">
             <textarea
               name="bio"
@@ -106,19 +137,6 @@ export default async function ImpostazioniPage() {
               defaultValue={profile.bio ?? ""}
               placeholder="Founder di una micro-SaaS, vengo dal mondo design, sto cercando un co-founder tecnico…"
               maxLength={500}
-            />
-          </Row>
-
-          <Row
-            label="Nota guadagni"
-            hint="Testo libero. Nessun obbligo, nessuna formula."
-          >
-            <input
-              name="revenue_note"
-              className="field"
-              defaultValue={profile.revenue_note ?? ""}
-              placeholder="Es. ~3k MRR · pre-revenue · in cerca di traction"
-              maxLength={120}
             />
           </Row>
 
@@ -203,6 +221,45 @@ export default async function ImpostazioniPage() {
                   required
                   maxLength={80}
                 />
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <select
+                    name="status"
+                    defaultValue={p.status ?? "in_corso"}
+                    className="field"
+                  >
+                    <option value="in_corso">🟢 In corso</option>
+                    <option value="completato">✅ Completato</option>
+                    <option value="chiuso">🔴 Chiuso</option>
+                  </select>
+                  <input
+                    name="year_start"
+                    type="number"
+                    min={1970}
+                    max={2100}
+                    className="field"
+                    defaultValue={p.year_start ?? ""}
+                    placeholder="Anno inizio"
+                  />
+                  <input
+                    name="year_end"
+                    type="number"
+                    min={1970}
+                    max={2100}
+                    className="field"
+                    defaultValue={p.year_end ?? ""}
+                    placeholder="Anno fine (vuoto = in corso)"
+                  />
+                </div>
+
+                <input
+                  name="revenue_note"
+                  className="field"
+                  defaultValue={p.revenue_note ?? ""}
+                  placeholder="💰 Risultati: es. 2k MRR · 100 utenti · exit €50k"
+                  maxLength={120}
+                />
+
                 <textarea
                   name="description"
                   className="field resize-y min-h-[80px]"
@@ -256,6 +313,35 @@ export default async function ImpostazioniPage() {
               placeholder="Nome del progetto"
               required
               maxLength={80}
+            />
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <select name="status" defaultValue="in_corso" className="field">
+                <option value="in_corso">🟢 In corso</option>
+                <option value="completato">✅ Completato</option>
+                <option value="chiuso">🔴 Chiuso</option>
+              </select>
+              <input
+                name="year_start"
+                type="number"
+                min={1970}
+                max={2100}
+                className="field"
+                placeholder="Anno inizio"
+              />
+              <input
+                name="year_end"
+                type="number"
+                min={1970}
+                max={2100}
+                className="field"
+                placeholder="Anno fine"
+              />
+            </div>
+            <input
+              name="revenue_note"
+              className="field"
+              placeholder="💰 Risultati (opzionale)"
+              maxLength={120}
             />
             <textarea
               name="description"

@@ -1,5 +1,7 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { ProjectCard } from "@/components/ProjectCard";
 
 export default async function ProfilePage({
   params,
@@ -9,21 +11,35 @@ export default async function ProfilePage({
   const { username } = await params;
   const supabase = await createClient();
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   const { data: profile } = await supabase
     .from("profiles")
     .select(
-      "id, username, full_name, bio, city, avatar_url, revenue_note, contact_email, contact_telegram, contact_linkedin, contact_twitter, contact_website, is_mentor",
+      "id, username, full_name, bio, city, age, occupation, avatar_url, contact_email, contact_telegram, contact_linkedin, contact_twitter, contact_website, is_mentor",
     )
     .eq("username", username)
     .maybeSingle();
 
   if (!profile) notFound();
 
-  const { data: projects } = await supabase
+  const isOwnProfile = user?.id === profile.id;
+
+  const { data: projectsRaw } = await supabase
     .from("user_projects")
-    .select("id, name, description, url")
+    .select(
+      "id, name, description, url, status, year_start, year_end, revenue_note",
+    )
     .eq("user_id", profile.id)
+    .order("year_start", { ascending: false, nullsFirst: false })
     .order("created_at", { ascending: false });
+
+  const projects = projectsRaw ?? [];
+  const inCorso = projects.filter((p) => (p.status ?? "in_corso") === "in_corso");
+  const completati = projects.filter((p) => p.status === "completato");
+  const chiusi = projects.filter((p) => p.status === "chiuso");
 
   const initial = (profile.full_name ?? profile.username)
     .charAt(0)
@@ -53,38 +69,54 @@ export default async function ProfilePage({
           </div>
 
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="font-display-tight font-semibold text-4xl sm:text-5xl leading-none tracking-tighter">
-                {profile.full_name ?? profile.username}
-              </h1>
-              {profile.is_mentor && (
-                <span
-                  className="px-3 py-1 rounded-full text-xs font-bold text-white"
-                  style={{
-                    background:
-                      "linear-gradient(135deg, #EF9CDA, #89A1EF)",
-                  }}
-                >
-                  ✨ Mentor
-                </span>
-              )}
-            </div>
-            <div className="mt-2 flex items-center gap-3 text-ink/60">
-              <span className="text-sm">@{profile.username}</span>
-              {profile.city && (
-                <>
-                  <span>·</span>
-                  <span className="text-sm">📍 {profile.city}</span>
-                </>
-              )}
-            </div>
-
-            {profile.revenue_note && (
-              <div className="mt-5 inline-flex items-center gap-2 chip">
-                <span>💰</span>
-                <span>{profile.revenue_note}</span>
+            <div className="flex items-start justify-between gap-3 flex-wrap">
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h1 className="font-display-tight font-semibold text-4xl sm:text-5xl leading-none tracking-tighter">
+                    {profile.full_name ?? profile.username}
+                  </h1>
+                  {profile.is_mentor && (
+                    <span
+                      className="px-3 py-1 rounded-full text-xs font-bold text-white"
+                      style={{
+                        background: "linear-gradient(135deg, #EF9CDA, #89A1EF)",
+                      }}
+                    >
+                      ✨ Mentor
+                    </span>
+                  )}
+                </div>
+                <div className="mt-2 flex items-center gap-3 text-ink/60 flex-wrap">
+                  <span className="text-sm">@{profile.username}</span>
+                  {profile.city && (
+                    <>
+                      <span>·</span>
+                      <span className="text-sm">📍 {profile.city}</span>
+                    </>
+                  )}
+                  {profile.age && (
+                    <>
+                      <span>·</span>
+                      <span className="text-sm">🎂 {profile.age} anni</span>
+                    </>
+                  )}
+                </div>
+                {profile.occupation && (
+                  <p className="mt-2 text-sm text-ink/70">
+                    💼 {profile.occupation}
+                  </p>
+                )}
               </div>
-            )}
+
+              {isOwnProfile && (
+                <Link
+                  href="/impostazioni"
+                  className="btn-ghost !py-2 !px-4 !text-sm shrink-0"
+                >
+                  ✏️ Modifica profilo
+                </Link>
+              )}
+            </div>
           </div>
         </div>
 
@@ -96,32 +128,43 @@ export default async function ProfilePage({
       </div>
 
       {/* Progetti */}
-      {projects && projects.length > 0 && (
+      {projects.length > 0 && (
+        <section className="mt-8 space-y-8">
+          <ProjectGroup
+            emoji="🟢"
+            title="In corso"
+            projects={inCorso}
+          />
+          <ProjectGroup
+            emoji="✅"
+            title="Completati"
+            projects={completati}
+          />
+          <ProjectGroup
+            emoji="🔴"
+            title="Chiusi"
+            projects={chiusi}
+          />
+        </section>
+      )}
+
+      {projects.length === 0 && isOwnProfile && (
         <section className="mt-8">
-          <h2 className="font-display font-semibold text-2xl mb-4 flex items-center gap-2">
-            <span>💡</span> Startup & progetti
-          </h2>
-          <div className="grid sm:grid-cols-2 gap-4">
-            {projects.map((p) => (
-              <div key={p.id} className="card p-5">
-                <h3 className="font-display font-semibold text-lg">{p.name}</h3>
-                {p.description && (
-                  <p className="mt-1 text-sm text-ink/70 leading-relaxed">
-                    {p.description}
-                  </p>
-                )}
-                {p.url && (
-                  <a
-                    href={p.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-3 inline-block text-sm font-semibold gradient-text hover:underline"
-                  >
-                    {p.url} ↗
-                  </a>
-                )}
-              </div>
-            ))}
+          <div className="card p-8 text-center border-dashed">
+            <div className="text-4xl mb-3">💡</div>
+            <h3 className="font-display font-semibold text-xl">
+              Aggiungi il tuo primo progetto
+            </h3>
+            <p className="mt-2 text-sm text-ink/60 max-w-sm mx-auto">
+              Mostra cosa stai costruendo o hai costruito. Anche se è ancora
+              brutto — fallo vedere.
+            </p>
+            <Link
+              href="/impostazioni"
+              className="btn-gradient !py-2.5 !px-5 !text-sm mt-5 inline-block"
+            >
+              ➕ Aggiungi un progetto
+            </Link>
           </div>
         </section>
       )}
@@ -129,6 +172,45 @@ export default async function ProfilePage({
       {/* Contatti */}
       <ContactsBlock profile={profile} />
     </article>
+  );
+}
+
+type ProjectRow = {
+  id: string;
+  name: string;
+  description: string | null;
+  url: string | null;
+  status: string | null;
+  year_start: number | null;
+  year_end: number | null;
+  revenue_note: string | null;
+};
+
+function ProjectGroup({
+  emoji,
+  title,
+  projects,
+}: {
+  emoji: string;
+  title: string;
+  projects: ProjectRow[];
+}) {
+  if (projects.length === 0) return null;
+  return (
+    <div>
+      <h2 className="font-display font-semibold text-xl mb-3 flex items-center gap-2">
+        <span>{emoji}</span>
+        <span>{title}</span>
+        <span className="text-ink/40 text-base font-normal">
+          ({projects.length})
+        </span>
+      </h2>
+      <div className="grid sm:grid-cols-2 gap-4">
+        {projects.map((p) => (
+          <ProjectCard key={p.id} project={p} />
+        ))}
+      </div>
+    </div>
   );
 }
 

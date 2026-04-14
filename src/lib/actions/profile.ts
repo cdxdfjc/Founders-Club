@@ -19,6 +19,19 @@ function str(v: FormDataEntryValue | null): string | null {
   return t.length === 0 ? null : t;
 }
 
+function intOrNull(v: FormDataEntryValue | null): number | null {
+  const s = str(v);
+  if (!s) return null;
+  const n = parseInt(s, 10);
+  return Number.isFinite(n) ? n : null;
+}
+
+function statusOrDefault(v: FormDataEntryValue | null): string {
+  const s = str(v);
+  if (s === "completato" || s === "chiuso" || s === "in_corso") return s;
+  return "in_corso";
+}
+
 function revalidateProfile() {
   revalidatePath("/impostazioni");
   revalidatePath("/profilo/[username]", "page");
@@ -27,13 +40,17 @@ function revalidateProfile() {
 export async function updateProfile(formData: FormData): Promise<void> {
   const { supabase, user } = await requireUser();
 
+  const age = intOrNull(formData.get("age"));
+  const safeAge = age !== null && age >= 14 && age <= 120 ? age : null;
+
   await supabase
     .from("profiles")
     .update({
       full_name: str(formData.get("full_name")),
       city: str(formData.get("city")),
       bio: str(formData.get("bio")),
-      revenue_note: str(formData.get("revenue_note")),
+      age: safeAge,
+      occupation: str(formData.get("occupation")),
       updated_at: new Date().toISOString(),
     })
     .eq("id", user.id);
@@ -70,6 +87,10 @@ export async function addProject(formData: FormData): Promise<void> {
     name,
     description: str(formData.get("description")),
     url: str(formData.get("url")),
+    status: statusOrDefault(formData.get("status")),
+    year_start: intOrNull(formData.get("year_start")),
+    year_end: intOrNull(formData.get("year_end")),
+    revenue_note: str(formData.get("revenue_note")),
   });
 
   revalidateProfile();
@@ -88,6 +109,10 @@ export async function updateProject(formData: FormData): Promise<void> {
       name,
       description: str(formData.get("description")),
       url: str(formData.get("url")),
+      status: statusOrDefault(formData.get("status")),
+      year_start: intOrNull(formData.get("year_start")),
+      year_end: intOrNull(formData.get("year_end")),
+      revenue_note: str(formData.get("revenue_note")),
     })
     .eq("id", id)
     .eq("user_id", user.id);

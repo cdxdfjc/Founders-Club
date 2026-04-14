@@ -4,16 +4,16 @@ import { Logo } from "@/components/Logo";
 
 const FEATURES = [
   {
-    emoji: "🎯",
-    color: "#32CBFF",
-    title: "Annunci & skill",
-    body: "Cerca o offri competenze: React, marketing, legal, design. La bacheca dei founder che costruiscono davvero.",
-  },
-  {
     emoji: "💡",
     color: "#89A1EF",
-    title: "Idee & progetti",
-    body: "Pubblica la tua visione. Chi ci crede lascia un like, chi vuole costruire chiede di entrare nel team.",
+    title: "Progetti",
+    body: "Pubblica la tua idea o entra in un team. Chi ci crede lascia un like, chi vuole costruire chiede di entrare.",
+  },
+  {
+    emoji: "🙋",
+    color: "#32CBFF",
+    title: "Aiuto",
+    body: "Sei bloccato? Chiedi una mano alla community: React, marketing, legal, design. Qualcuno ci è già passato.",
   },
   {
     emoji: "✨",
@@ -34,10 +34,10 @@ const FEATURES = [
     body: "Un caffè a Milano, una birra a Bologna. Incontri di persona con altri founder.",
   },
   {
-    emoji: "🦄",
-    color: "#89A1EF",
-    title: "Profili veri",
-    body: "Progetti, startup, numeri. Persone vere, non profili vuoti.",
+    emoji: "🍺",
+    color: "#FFB347",
+    title: "Bar",
+    body: "Chiacchiere al bancone: discussioni aperte, opinioni, sfoghi. Quello che condivideresti con un founder davanti a una birra.",
   },
 ];
 
@@ -68,26 +68,20 @@ export default function HomePage() {
       <section className="mx-auto max-w-[1200px] px-5 sm:px-8 pt-16 sm:pt-24 pb-20">
         <div className="grid grid-cols-12 gap-8 items-center">
           <div className="col-span-12 lg:col-span-7 rise">
-            <div className="chip mb-6">
-              <span className="w-2 h-2 rounded-full bg-fresh-sky animate-pulse"></span>
-              Edizione 1 · Beta privata
-            </div>
             <h1 className="font-display-tight font-semibold text-[56px] sm:text-[88px] lg:text-[112px] leading-[0.9] tracking-tighter">
-              La community{" "}
-              <span className="gradient-text">dei founder</span>{" "}
-              italiani.
+              <span className="block whitespace-nowrap">La community</span>
+              <span className="block whitespace-nowrap gradient-text">
+                dei founder.
+              </span>
             </h1>
             <p className="mt-8 text-[19px] sm:text-[21px] leading-relaxed text-ink/70 max-w-xl">
               Un posto dove puoi chiedere aiuto, pubblicare la tua idea, trovare
               mentor e incontrare altre persone che vogliono costruire qualcosa
               di buono. Niente guru, niente pose — solo founder veri.
             </p>
-            <div className="mt-10 flex flex-col sm:flex-row gap-3">
-              <Link href="/signup" className="btn-gradient">
+            <div className="mt-10">
+              <Link href="/login" className="btn-gradient">
                 Entra nella community →
-              </Link>
-              <Link href="/login" className="btn-ghost">
-                Ho già un account
               </Link>
             </div>
             <div className="mt-10 flex items-center gap-3 text-sm text-ink/60">
@@ -99,9 +93,15 @@ export default function HomePage() {
                   ></div>
                 ))}
               </div>
-              <span>
-                Popolata da{" "}
-                <span className="font-semibold text-ink">Startup Lab</span>
+              <span className="flex items-center gap-2">
+                Popolata da
+                <Image
+                  src="/dock-logo.png"
+                  alt="Dock Startup Lab"
+                  width={120}
+                  height={36}
+                  className="h-7 w-auto"
+                />
               </span>
             </div>
           </div>

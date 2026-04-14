@@ -3,9 +3,11 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { logout } from "@/lib/actions/auth";
 import { Logo } from "@/components/Logo";
+import { BackToFeed } from "@/components/BackToFeed";
 
 const NAV = [
   { href: "/progetti", label: "Progetti", emoji: "💡" },
+  { href: "/bar", label: "Bar", emoji: "🍺" },
   { href: "/aiuto", label: "Aiuto", emoji: "🙋" },
   { href: "/mentor", label: "Mentor", emoji: "✨" },
   { href: "/risorse", label: "Risorse", emoji: "📚" },
@@ -108,6 +110,7 @@ export default async function AppLayout({
 
       <main className="flex-1">
         <div className="mx-auto max-w-[1200px] px-5 sm:px-8 py-10 sm:py-14">
+          <BackToFeed />
           {children}
         </div>
       </main>
@@ -115,7 +118,7 @@ export default async function AppLayout({
       <footer className="mx-auto max-w-[1200px] w-full px-5 sm:px-8 py-8">
         <div className="glass rounded-2xl px-5 py-4 flex flex-wrap items-center justify-between gap-3 text-sm text-ink/60">
           <div>© {new Date().getFullYear()} Founders Club</div>
-          <div>Fatto con 🦄 in Italia</div>
+          <div>Chi non parte non arriva 🦄</div>
         </div>
       </footer>
     </div>

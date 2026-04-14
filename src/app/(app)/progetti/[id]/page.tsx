@@ -5,8 +5,10 @@ import {
   toggleLike,
   requestJoin,
   addComment,
+  deleteProject,
 } from "@/lib/actions/projects";
 import { stageMeta } from "@/lib/projects";
+import { DeleteButton } from "@/components/DeleteButton";
 
 export default async function ProgettoDettaglioPage({
   params,
@@ -173,6 +175,18 @@ export default async function ProgettoDettaglioPage({
                 >
                   🌐 Sito ↗
                 </a>
+              )}
+
+              {isOwner && (
+                <DeleteButton
+                  action={deleteProject}
+                  hiddenName="project_id"
+                  hiddenValue={project.id}
+                  confirmText="Sei sicuro di voler eliminare questo progetto? L'azione non è reversibile."
+                  className="px-4 py-2.5 rounded-full font-semibold text-sm border border-plum/40 text-plum bg-plum/10 hover:bg-plum/20 transition"
+                >
+                  🗑️ Elimina
+                </DeleteButton>
               )}
             </div>
           </div>
