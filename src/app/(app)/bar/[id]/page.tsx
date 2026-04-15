@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { addBarReply, deleteBarThread } from "@/lib/actions/bar";
 import { DeleteButton } from "@/components/DeleteButton";
+import { SubmitButton } from "@/components/SubmitButton";
 
 function timeAgo(iso: string): string {
   const s = Math.max(1, Math.floor((Date.now() - new Date(iso).getTime()) / 1000));
@@ -181,9 +182,12 @@ export default async function ThreadPage({
           />
         </label>
         <div className="mt-4 flex justify-end">
-          <button type="submit" className="btn-gradient !py-2.5 !px-5 !text-sm">
+          <SubmitButton
+            className="btn-gradient !py-2.5 !px-5 !text-sm"
+            pendingLabel="Invio…"
+          >
             Rispondi
-          </button>
+          </SubmitButton>
         </div>
       </form>
     </div>

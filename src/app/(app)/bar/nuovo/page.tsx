@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createBarThread } from "@/lib/actions/bar";
+import { SubmitButton } from "@/components/SubmitButton";
 
 export default async function NuovoThreadPage() {
   const supabase = await createClient();
@@ -61,9 +62,9 @@ export default async function NuovoThreadPage() {
           <Link href="/bar" className="btn-ghost !py-2.5 !px-5 !text-sm">
             Annulla
           </Link>
-          <button type="submit" className="btn-gradient">
+          <SubmitButton className="btn-gradient" pendingLabel="Pubblico…">
             🍺 Pubblica
-          </button>
+          </SubmitButton>
         </div>
       </form>
     </div>

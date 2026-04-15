@@ -7,6 +7,7 @@ import { BackToFeed } from "@/components/BackToFeed";
 
 const NAV = [
   { href: "/progetti", label: "Progetti", emoji: "💡" },
+  { href: "/community", label: "Community", emoji: "🫂" },
   { href: "/aiuto", label: "Aiuto", emoji: "🙋" },
   { href: "/mentor", label: "Mentor", emoji: "✨" },
   { href: "/risorse", label: "Risorse", emoji: "📚" },
@@ -35,6 +36,12 @@ export default async function AppLayout({
   const firstName =
     profile?.full_name?.split(" ")[0] ?? profile?.username ?? "tu";
 
+  const { count: pendingInviteCount } = await supabase
+    .from("project_invites")
+    .select("id", { count: "exact", head: true })
+    .eq("invitee_id", user.id)
+    .eq("status", "pending");
+
   return (
     <div className="min-h-screen flex flex-col">
       <header className="sticky top-0 z-30">
@@ -56,6 +63,24 @@ export default async function AppLayout({
             </nav>
 
             <div className="flex items-center gap-1.5">
+              <Link
+                href="/inviti"
+                className="relative hidden sm:inline-flex w-9 h-9 rounded-full items-center justify-center hover:bg-white/70 transition"
+                title="Inviti"
+              >
+                📬
+                {pendingInviteCount && pendingInviteCount > 0 ? (
+                  <span
+                    className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold text-white flex items-center justify-center"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, #EF9CDA, #89A1EF)",
+                    }}
+                  >
+                    {pendingInviteCount}
+                  </span>
+                ) : null}
+              </Link>
               <Link
                 href="/messaggi"
                 className="hidden sm:inline-flex w-9 h-9 rounded-full items-center justify-center hover:bg-white/70 transition"

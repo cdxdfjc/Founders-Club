@@ -5,6 +5,7 @@ import { useState, useTransition } from "react";
 import { createProject } from "@/lib/actions/projects";
 import { assistProjectDraft } from "@/lib/actions/ai";
 import { STAGES } from "@/lib/projects";
+import { SubmitButton } from "@/components/SubmitButton";
 
 type Category = { slug: string; name: string; emoji: string | null };
 
@@ -216,9 +217,12 @@ export function NuovoProgettoForm({ categories }: { categories: Category[] }) {
           <Link href="/progetti" className="btn-ghost !py-2.5 !px-5 !text-sm">
             Annulla
           </Link>
-          <button type="submit" className="btn-gradient">
+          <SubmitButton
+            className="btn-gradient"
+            pendingLabel="Pubblico…"
+          >
             ✨ Pubblica
-          </button>
+          </SubmitButton>
         </div>
       </form>
     </>

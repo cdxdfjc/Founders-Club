@@ -7,6 +7,7 @@ import {
   toggleHelpSolved,
 } from "@/lib/actions/help";
 import { DeleteButton } from "@/components/DeleteButton";
+import { SubmitButton } from "@/components/SubmitButton";
 import {
   HELP_GRADIENT,
   categoryMeta,
@@ -266,13 +267,13 @@ export default async function HelpRequestPage({
             />
           </label>
           <div className="mt-4 flex justify-end">
-            <button
-              type="submit"
+            <SubmitButton
               className="btn-gradient !py-2.5 !px-5 !text-sm"
               style={{ background: HELP_GRADIENT }}
+              pendingLabel="Invio…"
             >
               Rispondi
-            </button>
+            </SubmitButton>
           </div>
         </form>
       )}

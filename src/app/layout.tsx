@@ -18,7 +18,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Founders Club — La community dei founder italiani",
+  title: "Founders Club — La community dei founder",
   description:
     "Annunci, progetti, mentor, risorse e meetup per chi costruisce in Italia.",
 };

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 import { createHelpRequest } from "@/lib/actions/help";
 import { assistHelpRequest } from "@/lib/actions/ai";
+import { SubmitButton } from "@/components/SubmitButton";
 import {
   HELP_CATEGORIES,
   HELP_URGENCIES,
@@ -171,13 +172,13 @@ export function NuovaRichiestaForm() {
           <Link href="/aiuto" className="btn-ghost !py-2.5 !px-5 !text-sm">
             Annulla
           </Link>
-          <button
-            type="submit"
+          <SubmitButton
             className="btn-gradient"
             style={{ background: HELP_GRADIENT }}
+            pendingLabel="Pubblico…"
           >
             🙋 Pubblica
-          </button>
+          </SubmitButton>
         </div>
       </form>
     </>

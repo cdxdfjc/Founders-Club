@@ -9,6 +9,9 @@ import {
 } from "@/lib/actions/projects";
 import { stageMeta } from "@/lib/projects";
 import { DeleteButton } from "@/components/DeleteButton";
+import { SubmitButton } from "@/components/SubmitButton";
+import { InviteTeamBox } from "@/components/InviteTeamBox";
+import { cancelInvite } from "@/lib/actions/invites";
 
 export default async function ProgettoDettaglioPage({
   params,
@@ -75,6 +78,45 @@ export default async function ProgettoDettaglioPage({
   const userLiked = !!likes?.find((l) => l.user_id === user.id);
   const memberCount = (members?.length ?? 0) + 1; // +1 owner
   const isOwner = owner?.id === user.id;
+  const memberIds = new Set((members ?? []).map((m) => m.user_id));
+  const isMember = memberIds.has(user.id);
+  const canInvite = isOwner || isMember;
+
+  // Candidati e inviti pendenti (solo se può invitare)
+  type Candidate = { id: string; username: string; full_name: string | null };
+  type PendingInvite = {
+    id: string;
+    invitee: { username: string; full_name: string | null } | null;
+  };
+  let candidates: Candidate[] = [];
+  let pendingInvites: PendingInvite[] = [];
+  if (canInvite) {
+    const excluded = new Set<string>([...memberIds, owner?.id ?? ""]);
+
+    const [{ data: allProfiles }, { data: invs }] = await Promise.all([
+      supabase
+        .from("profiles")
+        .select("id, username, full_name")
+        .order("full_name", { ascending: true })
+        .limit(500),
+      supabase
+        .from("project_invites")
+        .select(
+          `id, invitee_id, invitee:profiles!project_invites_invitee_id_fkey ( username, full_name )`,
+        )
+        .eq("project_id", id)
+        .eq("status", "pending"),
+    ]);
+
+    for (const inv of (invs as unknown as { invitee_id: string }[] | null) ??
+      []) {
+      excluded.add(inv.invitee_id);
+    }
+    candidates = ((allProfiles as Candidate[] | null) ?? []).filter(
+      (p) => !excluded.has(p.id),
+    );
+    pendingInvites = (invs as unknown as PendingInvite[] | null) ?? [];
+  }
   const stage = stageMeta(project.stage);
 
   const ownerName = owner?.full_name ?? owner?.username ?? "anonimo";
@@ -255,10 +297,70 @@ export default async function ProgettoDettaglioPage({
                 placeholder="Sono uno sviluppatore React, mi piace molto l'idea perché…"
                 maxLength={500}
               />
-              <button type="submit" className="btn-gradient !py-2.5 !px-5 !text-sm">
+              <SubmitButton
+                className="btn-gradient !py-2.5 !px-5 !text-sm"
+                pendingLabel="Invio…"
+              >
                 Invia richiesta
-              </button>
+              </SubmitButton>
             </form>
+          )}
+        </section>
+      )}
+
+      {/* INVITA AL TEAM */}
+      {canInvite && (
+        <section className="card p-7 sm:p-9">
+          <h2 className="font-display font-semibold text-2xl mb-2 flex items-center gap-2">
+            <span>✉️</span> Invita qualcuno nel team
+          </h2>
+          <p className="text-sm text-ink/60 mb-4">
+            Cerca un membro della community e mandagli un invito. Riceverà la
+            richiesta e potrà accettare o rifiutare.
+          </p>
+
+          <InviteTeamBox
+            projectId={project.id}
+            candidates={candidates}
+          />
+
+          {pendingInvites.length > 0 && (
+            <div className="mt-6 pt-5 border-t border-ink/5">
+              <p className="text-xs font-semibold text-ink/50 uppercase tracking-wider mb-3">
+                Inviti in attesa
+              </p>
+              <ul className="space-y-2">
+                {pendingInvites.map((inv) => {
+                  const name =
+                    inv.invitee?.full_name ??
+                    inv.invitee?.username ??
+                    "utente";
+                  return (
+                    <li
+                      key={inv.id}
+                      className="flex items-center justify-between gap-3 text-sm"
+                    >
+                      <span className="text-ink/70 truncate">
+                        ⏳ {name}
+                      </span>
+                      <form action={cancelInvite}>
+                        <input
+                          type="hidden"
+                          name="invite_id"
+                          value={inv.id}
+                        />
+                        <button
+                          type="submit"
+                          className="text-xs text-ink/50 hover:text-plum transition"
+                        >
+                          Annulla
+                        </button>
+                      </form>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
           )}
         </section>
       )}
@@ -280,9 +382,12 @@ export default async function ProgettoDettaglioPage({
             maxLength={1000}
           />
           <div>
-            <button type="submit" className="btn-ghost !py-2 !px-4 !text-sm">
+            <SubmitButton
+              className="btn-ghost !py-2 !px-4 !text-sm"
+              pendingLabel="Pubblico…"
+            >
               Pubblica commento
-            </button>
+            </SubmitButton>
           </div>
         </form>
 

@@ -6,6 +6,7 @@ import { createResource, previewUrl } from "@/lib/actions/resources";
 import { assistResource } from "@/lib/actions/ai";
 import { RESOURCES_GRADIENT } from "@/lib/resources";
 import type { OgPreview } from "@/lib/og";
+import { SubmitButton } from "@/components/SubmitButton";
 
 type CategoryOption = {
   slug: string;
@@ -254,13 +255,13 @@ export function NuovaRisorsaForm({
           <Link href="/risorse" className="btn-ghost !py-2.5 !px-5 !text-sm">
             Annulla
           </Link>
-          <button
-            type="submit"
+          <SubmitButton
             className="!py-3 !px-6 rounded-full text-white font-semibold shadow-sm hover:shadow-md transition"
             style={{ background: RESOURCES_GRADIENT }}
+            pendingLabel="Pubblico…"
           >
             📚 Pubblica
-          </button>
+          </SubmitButton>
         </div>
       </form>
     </>
