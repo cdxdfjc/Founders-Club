@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { openaiJSON } from "@/lib/ai/openai";
 import { STAGES } from "@/lib/projects";
+import { HELP_CATEGORIES, HELP_URGENCIES } from "@/lib/help";
 
 export type UserProjectDraft = {
   name: string;
@@ -75,6 +76,97 @@ Regole sui campi:
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Errore sconosciuto";
     console.error("[assistUserProject]", msg);
+    return {
+      ok: false,
+      error: "L'assistente AI non ha risposto. Riprova tra un attimo.",
+    };
+  }
+}
+
+export type HelpDraft = {
+  title: string;
+  body: string;
+  category:
+    | "tecnico"
+    | "legale"
+    | "prodotto"
+    | "marketing"
+    | "finanziamento"
+    | "altro";
+  urgency: "bassa" | "media" | "alta";
+};
+
+export async function assistHelpRequest(
+  rawText: string,
+): Promise<{ ok: true; draft: HelpDraft } | { ok: false; error: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const text = (rawText ?? "").trim();
+  if (text.length < 20) {
+    return {
+      ok: false,
+      error:
+        "Scrivi almeno 20 caratteri per farmi capire di cosa hai bisogno.",
+    };
+  }
+  if (text.length > 3000) {
+    return { ok: false, error: "Testo troppo lungo. Massimo 3000 caratteri." };
+  }
+
+  const catList = HELP_CATEGORIES.map(
+    (c) => `"${c.value}" (${c.label})`,
+  ).join(", ");
+  const urgList = HELP_URGENCIES.map(
+    (u) => `"${u.value}" (${u.label})`,
+  ).join(", ");
+
+  const system = `Sei un assistente che aiuta founder italiani a formulare una richiesta di aiuto chiara alla community Founders Club.
+
+L'utente ti dà del testo grezzo (il problema che ha, buttato giù di getto). Tu lo trasformi in 4 campi strutturati che diventano la sua "card di richiesta aiuto".
+
+Rispondi SEMPRE in italiano. Tono concreto, umile, diretto. Mai gergo tecnico inutile, mai marketing-bullshit. Non inventare dettagli che non ci sono nel testo.
+
+Regole sui campi:
+- "title": una domanda/richiesta chiara, max 100 caratteri. Deve far capire subito di cosa si tratta. Se puoi, formulala come domanda.
+- "body": 3-8 frasi che spiegano il contesto, il problema specifico, cosa è stato già provato (se menzionato), e cosa serve di preciso. Max 1200 caratteri. Riformula in modo leggibile ma resta fedele al testo.
+- "category": scegli UNA da: ${catList}. Se nessuna calza perfettamente, usa "altro".
+- "urgency": scegli UNA da: ${urgList}. "bassa" = curiosità o tema non bloccante, "media" = serve nel giro di giorni, "alta" = bloccato adesso. Se non chiaro, usa "media".`;
+
+  const userPrompt = `Ecco il testo grezzo dell'utente:\n\n"""\n${text}\n"""`;
+
+  const schema = {
+    type: "object",
+    additionalProperties: false,
+    properties: {
+      title: { type: "string" },
+      body: { type: "string" },
+      category: {
+        type: "string",
+        enum: HELP_CATEGORIES.map((c) => c.value),
+      },
+      urgency: {
+        type: "string",
+        enum: HELP_URGENCIES.map((u) => u.value),
+      },
+    },
+    required: ["title", "body", "category", "urgency"],
+  };
+
+  try {
+    const draft = await openaiJSON<HelpDraft>({
+      system,
+      user: userPrompt,
+      schema,
+      schemaName: "help_request_draft",
+    });
+    return { ok: true, draft };
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "Errore sconosciuto";
+    console.error("[assistHelpRequest]", msg);
     return {
       ok: false,
       error: "L'assistente AI non ha risposto. Riprova tra un attimo.",
