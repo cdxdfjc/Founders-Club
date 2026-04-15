@@ -250,7 +250,7 @@ function EmptyState() {
           className="btn-gradient !py-3 !px-6"
           style={{ background: HELP_GRADIENT }}
         >
-          🙋 Chiedi la prima mano
+          🙋 Chiedi una mano per primo
         </Link>
       </div>
     </div>

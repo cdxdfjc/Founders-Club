@@ -174,6 +174,104 @@ Regole sui campi:
   }
 }
 
+export type ResourceDraft = {
+  title: string;
+  description: string;
+  category: string;
+};
+
+export async function assistResource(input: {
+  userNote: string;
+  og?: {
+    title: string | null;
+    description: string | null;
+    siteName: string | null;
+    url: string;
+  } | null;
+}): Promise<
+  { ok: true; draft: ResourceDraft } | { ok: false; error: string }
+> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const note = (input.userNote ?? "").trim();
+  const og = input.og ?? null;
+
+  if (!note && !og) {
+    return {
+      ok: false,
+      error:
+        "Serve un link o qualche riga di nota per farmi capire di cosa parliamo.",
+    };
+  }
+  if (note.length > 2000) {
+    return { ok: false, error: "Nota troppo lunga. Massimo 2000 caratteri." };
+  }
+
+  // Lista categorie esistenti per dare contesto al modello
+  const { data: cats } = await supabase
+    .from("resource_categories")
+    .select("name")
+    .order("name");
+  const catList = (cats ?? []).map((c) => c.name).join(", ");
+
+  const system = `Sei un assistente che aiuta founder italiani a trasformare un link (o una nota) in una "risorsa consigliata" chiara per altri membri della community Founders Club.
+
+L'output è una piccola card di suggerimento. Deve essere utile, onesta, concreta. Mai marketing-bullshit, mai hype, mai inventare fatti non presenti nel testo o nell'anteprima.
+
+Rispondi SEMPRE in italiano. Tono pratico, caldo, come un amico che ti passa un link dicendo "guarda questo".
+
+Regole sui campi:
+- "title": nome chiaro della risorsa (max 100 caratteri). Se c'è un titolo OG usalo come base, ma rendilo leggibile in italiano se serve. Non usare tutto maiuscolo, non usare emoji.
+- "description": 2-4 frasi (max 500 caratteri). Spiega cosa è e PERCHÉ è utile a un founder. Se l'utente ha scritto una nota personale ("lo uso per X", "mi ha aiutato a Y"), PRESERVALA nel testo. Non ripetere il titolo.
+- "category": scegli UNA categoria dalla lista esistente: ${catList}. Se davvero nessuna calza, proponine una nuova breve (1 parola, max 12 caratteri, prima lettera maiuscola).`;
+
+  const parts: string[] = [];
+  if (og) {
+    parts.push(`URL: ${og.url}`);
+    if (og.siteName) parts.push(`Sito: ${og.siteName}`);
+    if (og.title) parts.push(`Titolo della pagina: ${og.title}`);
+    if (og.description)
+      parts.push(`Descrizione della pagina: ${og.description}`);
+  }
+  if (note) {
+    parts.push(`Nota dell'utente: ${note}`);
+  }
+
+  const userPrompt = `Ecco quello che abbiamo:\n\n${parts.join("\n")}`;
+
+  const schema = {
+    type: "object",
+    additionalProperties: false,
+    properties: {
+      title: { type: "string" },
+      description: { type: "string" },
+      category: { type: "string" },
+    },
+    required: ["title", "description", "category"],
+  };
+
+  try {
+    const draft = await openaiJSON<ResourceDraft>({
+      system,
+      user: userPrompt,
+      schema,
+      schemaName: "resource_draft",
+    });
+    return { ok: true, draft };
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "Errore sconosciuto";
+    console.error("[assistResource]", msg);
+    return {
+      ok: false,
+      error: "L'assistente AI non ha risposto. Riprova tra un attimo.",
+    };
+  }
+}
+
 export type ProjectDraft = {
   title: string;
   tagline: string;
