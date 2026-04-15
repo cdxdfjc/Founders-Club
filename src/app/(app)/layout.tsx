@@ -1,19 +1,9 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { logout } from "@/lib/actions/auth";
 import { Logo } from "@/components/Logo";
 import { BackToFeed } from "@/components/BackToFeed";
-
-const NAV = [
-  { href: "/progetti", label: "Progetti", emoji: "💡" },
-  { href: "/community", label: "Community", emoji: "🫂" },
-  { href: "/aiuto", label: "Aiuto", emoji: "🙋" },
-  { href: "/mentor", label: "Mentor", emoji: "✨" },
-  { href: "/risorse", label: "Risorse", emoji: "📚" },
-  { href: "/eventi", label: "Meetup", emoji: "☕" },
-  { href: "/bar", label: "Bar", emoji: "🍺" },
-];
+import { HeaderUserMenu } from "@/components/HeaderUserMenu";
 
 export default async function AppLayout({
   children,
@@ -36,11 +26,24 @@ export default async function AppLayout({
   const firstName =
     profile?.full_name?.split(" ")[0] ?? profile?.username ?? "tu";
 
-  const { count: pendingInviteCount } = await supabase
-    .from("project_invites")
-    .select("id", { count: "exact", head: true })
-    .eq("invitee_id", user.id)
-    .eq("status", "pending");
+  const [
+    { count: pendingInviteCount },
+    { count: membersCount },
+    { count: projectsCount },
+    { count: openHelpCount },
+  ] = await Promise.all([
+    supabase
+      .from("project_invites")
+      .select("id", { count: "exact", head: true })
+      .eq("invitee_id", user.id)
+      .eq("status", "pending"),
+    supabase.from("profiles").select("id", { count: "exact", head: true }),
+    supabase.from("projects").select("id", { count: "exact", head: true }),
+    supabase
+      .from("help_requests")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "aperta"),
+  ]);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -49,26 +52,51 @@ export default async function AppLayout({
           <div className="glass rounded-full pl-3 pr-2 py-2 flex items-center justify-between gap-3">
             <Logo size="sm" href="/feed" />
 
-            <nav className="hidden lg:flex items-center gap-1">
-              {NAV.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="px-3.5 py-2 rounded-full text-sm font-semibold hover:bg-white/70 transition flex items-center gap-1.5"
-                >
-                  <span>{item.emoji}</span>
-                  <span>{item.label}</span>
-                </Link>
-              ))}
+            <nav className="flex items-center gap-0.5 sm:gap-1 text-sm">
+              <Link
+                href="/community"
+                className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-full hover:bg-white/70 transition"
+                title="Community"
+              >
+                <span>🫂</span>
+                <span className="font-bold tabular-nums">
+                  {membersCount ?? 0}
+                </span>
+                <span className="text-ink/50 hidden lg:inline">founder</span>
+              </Link>
+              <span className="text-ink/20 hidden sm:inline">·</span>
+              <Link
+                href="/progetti"
+                className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-full hover:bg-white/70 transition"
+                title="Progetti"
+              >
+                <span>💡</span>
+                <span className="font-bold tabular-nums">
+                  {projectsCount ?? 0}
+                </span>
+                <span className="text-ink/50 hidden lg:inline">progetti</span>
+              </Link>
+              <span className="text-ink/20 hidden sm:inline">·</span>
+              <Link
+                href="/aiuto"
+                className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-full hover:bg-white/70 transition"
+                title="Richieste d'aiuto aperte"
+              >
+                <span>🙋</span>
+                <span className="font-bold tabular-nums">
+                  {openHelpCount ?? 0}
+                </span>
+                <span className="text-ink/50 hidden lg:inline">aiuti</span>
+              </Link>
             </nav>
 
             <div className="flex items-center gap-1.5">
               <Link
-                href="/inviti"
+                href="/messaggi"
                 className="relative hidden sm:inline-flex w-9 h-9 rounded-full items-center justify-center hover:bg-white/70 transition"
-                title="Inviti"
+                title="Inbox"
               >
-                📬
+                ✉️
                 {pendingInviteCount && pendingInviteCount > 0 ? (
                   <span
                     className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold text-white flex items-center justify-center"
@@ -81,55 +109,14 @@ export default async function AppLayout({
                   </span>
                 ) : null}
               </Link>
-              <Link
-                href="/messaggi"
-                className="hidden sm:inline-flex w-9 h-9 rounded-full items-center justify-center hover:bg-white/70 transition"
-                title="Messaggi"
-              >
-                ✉️
-              </Link>
-              <Link
-                href={`/profilo/${profile?.username ?? user.id}`}
-                className="flex items-center gap-2 px-2.5 py-1.5 rounded-full hover:bg-white/70 transition"
-              >
-                <span
-                  className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold"
-                  style={{
-                    background:
-                      "linear-gradient(135deg, #32CBFF, #89A1EF, #EF9CDA)",
-                  }}
-                >
-                  {firstName.charAt(0).toUpperCase()}
-                </span>
-                <span className="text-sm font-semibold hidden sm:inline">
-                  {firstName}
-                </span>
-              </Link>
-              <form action={logout}>
-                <button
-                  type="submit"
-                  className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-white/70 transition text-ink/60"
-                  title="Esci"
-                >
-                  ⎋
-                </button>
-              </form>
+              <HeaderUserMenu
+                firstName={firstName}
+                username={profile?.username ?? user.id}
+                avatarUrl={profile?.avatar_url ?? null}
+              />
             </div>
           </div>
 
-          {/* Mobile nav */}
-          <nav className="lg:hidden mt-3 flex items-center gap-2 overflow-x-auto pb-1">
-            {NAV.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="chip whitespace-nowrap hover:bg-white transition"
-              >
-                <span>{item.emoji}</span>
-                <span className="font-semibold">{item.label}</span>
-              </Link>
-            ))}
-          </nav>
         </div>
       </header>
 

@@ -111,7 +111,7 @@ export default async function ProfilePage({
               {isOwnProfile && (
                 <Link
                   href="/impostazioni"
-                  className="btn-ghost !py-2 !px-4 !text-sm shrink-0"
+                  className="btn-gradient !py-2.5 !px-5 !text-sm shrink-0"
                 >
                   ✏️ Modifica profilo
                 </Link>

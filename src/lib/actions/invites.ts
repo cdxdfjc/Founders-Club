@@ -69,7 +69,7 @@ export async function sendInvite(formData: FormData): Promise<void> {
   });
 
   revalidatePath(`/progetti/${projectId}`);
-  revalidatePath("/inviti");
+  revalidatePath("/messaggi");
 }
 
 export async function acceptInvite(formData: FormData): Promise<void> {
@@ -86,7 +86,7 @@ export async function acceptInvite(formData: FormData): Promise<void> {
 
   if (error) return;
 
-  revalidatePath("/inviti");
+  revalidatePath("/messaggi");
   revalidatePath("/progetti");
 }
 
@@ -102,7 +102,7 @@ export async function declineInvite(formData: FormData): Promise<void> {
     .eq("invitee_id", user.id)
     .eq("status", "pending");
 
-  revalidatePath("/inviti");
+  revalidatePath("/messaggi");
 }
 
 export async function cancelInvite(formData: FormData): Promise<void> {

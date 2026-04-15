@@ -7,21 +7,18 @@ type ProfileRow = {
   id: string;
   username: string;
   full_name: string | null;
-  bio: string | null;
-  city: string | null;
   avatar_url: string | null;
   is_mentor: boolean;
+  age: number | null;
+  city: string | null;
+  occupation: string | null;
 };
 
-type ProjectRow = {
+type UserProjectRow = {
   id: string;
-  title: string;
-  owner_id: string;
-};
-
-type MemberRow = {
   user_id: string;
-  project: { id: string; title: string; owner_id: string } | null;
+  name: string;
+  status: string | null;
 };
 
 export default async function CommunityPage({
@@ -34,36 +31,26 @@ export default async function CommunityPage({
 
   const qTrim = (q ?? "").trim();
 
-  // Strategia: carica profili + progetti propri + membership, aggrega lato server.
-  // Su scala MVP (<1000 utenti) è sostenibile. Se cresce, passiamo a RPC.
+  // Carica profili + user_projects (progetti dal profilo, non quelli pubblicati)
   const { data: profiles } = await supabase
     .from("profiles")
-    .select("id, username, full_name, bio, city, avatar_url, is_mentor")
+    .select(
+      "id, username, full_name, avatar_url, is_mentor, age, city, occupation",
+    )
     .order("created_at", { ascending: false })
     .limit(500);
 
-  const { data: projects } = await supabase
-    .from("projects")
-    .select("id, title, owner_id");
+  const { data: userProjects } = await supabase
+    .from("user_projects")
+    .select("id, user_id, name, status")
+    .order("year_start", { ascending: false, nullsFirst: false });
 
-  const { data: members } = await supabase
-    .from("project_members")
-    .select("user_id, project:projects ( id, title, owner_id )");
-
-  // Mappa user_id → progetti (posseduti + membership)
-  const projectsByUser = new Map<string, { id: string; title: string }[]>();
-  for (const p of (projects as ProjectRow[] | null) ?? []) {
-    const arr = projectsByUser.get(p.owner_id) ?? [];
-    arr.push({ id: p.id, title: p.title });
-    projectsByUser.set(p.owner_id, arr);
-  }
-  for (const m of (members as unknown as MemberRow[] | null) ?? []) {
-    if (!m.project) continue;
-    const arr = projectsByUser.get(m.user_id) ?? [];
-    if (!arr.some((p) => p.id === m.project!.id)) {
-      arr.push({ id: m.project.id, title: m.project.title });
-    }
-    projectsByUser.set(m.user_id, arr);
+  // Mappa user_id → user_projects
+  const projectsByUser = new Map<string, { id: string; name: string }[]>();
+  for (const p of (userProjects as UserProjectRow[] | null) ?? []) {
+    const arr = projectsByUser.get(p.user_id) ?? [];
+    arr.push({ id: p.id, name: p.name });
+    projectsByUser.set(p.user_id, arr);
   }
 
   const all = (profiles as ProfileRow[] | null) ?? [];
@@ -74,13 +61,13 @@ export default async function CommunityPage({
         if (
           (p.full_name ?? "").toLowerCase().includes(needle) ||
           p.username.toLowerCase().includes(needle) ||
-          (p.bio ?? "").toLowerCase().includes(needle) ||
-          (p.city ?? "").toLowerCase().includes(needle)
+          (p.city ?? "").toLowerCase().includes(needle) ||
+          (p.occupation ?? "").toLowerCase().includes(needle)
         ) {
           return true;
         }
         const projs = projectsByUser.get(p.id) ?? [];
-        return projs.some((x) => x.title.toLowerCase().includes(needle));
+        return projs.some((x) => x.name.toLowerCase().includes(needle));
       })
     : all;
 
@@ -108,7 +95,7 @@ export default async function CommunityPage({
             type="text"
             name="q"
             defaultValue={qTrim}
-            placeholder="Cerca per nome, username, progetto, città…"
+            placeholder="Cerca per nome, città, professione o progetto…"
             className="field !py-3 min-w-0 flex-1"
           />
           <button
@@ -143,7 +130,7 @@ function MemberCard({
   projects,
 }: {
   profile: ProfileRow;
-  projects: { id: string; title: string }[];
+  projects: { id: string; name: string }[];
 }) {
   const name = profile.full_name ?? profile.username;
   const initial = name.charAt(0).toUpperCase();
@@ -153,7 +140,7 @@ function MemberCard({
       href={`/profilo/${profile.username}`}
       className="card p-6 flex flex-col group hover:shadow-md transition"
     >
-      <div className="flex items-start gap-4">
+      <div className="flex items-center gap-4">
         {profile.avatar_url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -175,45 +162,60 @@ function MemberCard({
           <div className="flex items-center gap-2 flex-wrap">
             <h3 className="font-display font-semibold text-lg leading-tight truncate">
               {name}
+              {profile.age ? (
+                <span className="text-ink/40 font-normal">
+                  , {profile.age}
+                </span>
+              ) : null}
             </h3>
             {profile.is_mentor && (
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full text-white"
-                style={{ background: "linear-gradient(135deg, #FFC857, #EF9CDA)" }}>
+              <span
+                className="text-[10px] font-bold px-2 py-0.5 rounded-full text-white"
+                style={{
+                  background: "linear-gradient(135deg, #FFC857, #EF9CDA)",
+                }}
+              >
                 MENTOR
               </span>
             )}
           </div>
-          <p className="text-sm text-ink/50">@{profile.username}</p>
           {profile.city && (
-            <p className="text-xs text-ink/40 mt-0.5">📍 {profile.city}</p>
+            <p className="text-sm text-ink/60 truncate">📍 {profile.city}</p>
+          )}
+          {profile.occupation && (
+            <p className="text-sm text-ink/50 truncate">
+              💼 {profile.occupation}
+            </p>
           )}
         </div>
       </div>
 
-      {profile.bio && (
-        <p className="mt-4 text-sm text-ink/70 line-clamp-2">{profile.bio}</p>
-      )}
-
-      {projects.length > 0 && (
-        <div className="mt-4 flex flex-wrap gap-1.5">
-          {projects.slice(0, 3).map((pr) => (
-            <span
-              key={pr.id}
-              className="text-xs px-2 py-0.5 rounded-full text-ink/60 truncate max-w-[160px]"
-              style={{
-                background: "rgba(137,161,239,0.12)",
-                border: "1px solid rgba(137,161,239,0.25)",
-              }}
-            >
-              💡 {pr.title}
-            </span>
-          ))}
-          {projects.length > 3 && (
-            <span className="text-xs text-ink/40 px-1">
-              +{projects.length - 3}
-            </span>
-          )}
+      {projects.length > 0 ? (
+        <div className="mt-5 pt-5 border-t border-ink/5">
+          <p className="text-[11px] font-semibold text-ink/40 uppercase tracking-wider mb-2">
+            Progetti
+          </p>
+          <ul className="space-y-1">
+            {projects.slice(0, 4).map((pr) => (
+              <li
+                key={pr.id}
+                className="text-sm text-ink/70 truncate flex items-center gap-1.5"
+              >
+                <span className="text-xs">💡</span>
+                <span className="truncate">{pr.name}</span>
+              </li>
+            ))}
+            {projects.length > 4 && (
+              <li className="text-xs text-ink/40">
+                +{projects.length - 4} altri
+              </li>
+            )}
+          </ul>
         </div>
+      ) : (
+        <p className="mt-5 pt-5 border-t border-ink/5 text-xs text-ink/40 italic">
+          Nessun progetto nel profilo ancora.
+        </p>
       )}
     </Link>
   );

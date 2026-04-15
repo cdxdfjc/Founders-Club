@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { ProfileCompletionBanner } from "@/components/ProfileCompletionBanner";
 
 const CARDS = [
   {
@@ -45,6 +46,13 @@ const CARDS = [
     title: "Bar",
     body: "Chiacchiere al bancone con altri founder.",
   },
+  {
+    href: "/community",
+    emoji: "🫂",
+    color: "#B4A7F5",
+    title: "Community",
+    body: "Scopri chi c'è dentro e su cosa sta lavorando.",
+  },
 ];
 
 export default async function FeedPage() {
@@ -55,15 +63,40 @@ export default async function FeedPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name, username")
+    .select("full_name, username, avatar_url, bio, city, age, occupation")
     .eq("id", user!.id)
     .maybeSingle();
 
   const firstName =
     profile?.full_name?.split(" ")[0] ?? profile?.username ?? "founder";
 
+  const checks: { key: keyof NonNullable<typeof profile>; label: string }[] = [
+    { key: "full_name", label: "nome" },
+    { key: "avatar_url", label: "foto" },
+    { key: "bio", label: "bio" },
+    { key: "city", label: "città" },
+    { key: "age", label: "età" },
+    { key: "occupation", label: "professione" },
+  ];
+  const missingLabels = checks
+    .filter((c) => {
+      const v = profile?.[c.key];
+      return v === null || v === undefined || v === "";
+    })
+    .map((c) => c.label);
+  const total = checks.length;
+  const completed = total - missingLabels.length;
+  const showBanner = completed < total;
+
   return (
     <div>
+      {showBanner && (
+        <ProfileCompletionBanner
+          completed={completed}
+          total={total}
+          missingLabels={missingLabels}
+        />
+      )}
       <div className="flex items-start justify-between gap-6 flex-wrap">
         <div className="rise">
           <div className="chip mb-4">
