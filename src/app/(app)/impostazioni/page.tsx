@@ -6,6 +6,7 @@ import { DeleteAccountButton } from "@/components/DeleteAccountButton";
 import { ProfileForm } from "@/components/ProfileForm";
 import { ContactsForm } from "@/components/ContactsForm";
 import { ProjectCard } from "@/components/ProjectCard";
+import { DockAlumniToggle } from "@/components/DockAlumniToggle";
 
 export default async function ImpostazioniPage() {
   const supabase = await createClient();
@@ -17,7 +18,7 @@ export default async function ImpostazioniPage() {
   const { data: profile } = await supabase
     .from("profiles")
     .select(
-      "id, username, full_name, bio, city, age, occupation, contact_email, contact_telegram, contact_linkedin, contact_twitter, contact_instagram, contact_website, is_mentor",
+      "id, username, full_name, bio, city, age, occupation, contact_email, contact_telegram, contact_linkedin, contact_twitter, contact_instagram, contact_website, is_mentor, is_dock_alumni",
     )
     .eq("id", user.id)
     .maybeSingle();
@@ -78,6 +79,10 @@ export default async function ImpostazioniPage() {
             bio: profile.bio ?? "",
           }}
         />
+
+        <div className="mt-6 pt-6 border-t border-ink/5">
+          <DockAlumniToggle initialValue={profile.is_dock_alumni ?? false} />
+        </div>
       </Section>
 
       {/* CONTATTI */}

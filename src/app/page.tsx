@@ -232,6 +232,32 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* DOCK */}
+      <section className="mx-auto max-w-[1200px] px-4 sm:px-8 pb-8 sm:pb-12">
+        <div className="card p-6 sm:p-10 flex flex-col sm:flex-row items-center gap-6 sm:gap-10">
+          <div className="shrink-0">
+            <Image
+              src="/dock-logo.png"
+              alt="Dock Startup Lab"
+              width={160}
+              height={48}
+              className="h-10 sm:h-12 w-auto opacity-90"
+            />
+          </div>
+          <div className="text-center sm:text-left flex-1">
+            <h3 className="font-display font-semibold text-lg sm:text-xl">
+              Nata dall&apos;ecosistema{" "}
+              <span className="gradient-text">Dock Startup Lab</span>
+            </h3>
+            <p className="mt-2 text-sm sm:text-base text-ink/60 max-w-lg">
+              Founders Club nasce dall&apos;energia dei founder che si sono
+              incontrati in Dock. Oggi è aperta a tutti, ma le radici sono
+              lì — e la community cresce grazie a chi ci crede dal giorno zero.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* FOOTER */}
       <footer className="mx-auto max-w-[1200px] px-4 sm:px-8 py-6 sm:py-10">
         <div className="glass rounded-2xl sm:rounded-3xl px-4 sm:px-6 py-4 sm:py-5 flex flex-wrap items-center justify-between gap-3 text-xs sm:text-sm text-ink/60">

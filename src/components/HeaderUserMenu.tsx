@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { logout } from "@/lib/actions/auth";
 
@@ -21,23 +21,22 @@ export function HeaderUserMenu({ firstName, username, avatarUrl }: Props) {
   const btnRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
+  const computePos = useCallback(() => {
+    const el = btnRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    setPos({
+      top: r.bottom + 8,
+      right: window.innerWidth - r.right,
+    });
+  }, []);
+
   useEffect(() => {
     setMounted(true);
   }, []);
 
   useEffect(() => {
     if (!open) return;
-
-    function computePos() {
-      const el = btnRef.current;
-      if (!el) return;
-      const r = el.getBoundingClientRect();
-      setPos({
-        top: r.bottom + 8,
-        right: window.innerWidth - r.right,
-      });
-    }
-    computePos();
 
     function onDocClick(e: MouseEvent) {
       const t = e.target as Node;
@@ -60,7 +59,7 @@ export function HeaderUserMenu({ firstName, username, avatarUrl }: Props) {
       window.removeEventListener("resize", computePos);
       window.removeEventListener("scroll", computePos, true);
     };
-  }, [open]);
+  }, [open, computePos]);
 
   const initial = firstName.charAt(0).toUpperCase();
 
@@ -122,7 +121,10 @@ export function HeaderUserMenu({ firstName, username, avatarUrl }: Props) {
       <button
         ref={btnRef}
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => {
+          if (!open) computePos();
+          setOpen((v) => !v);
+        }}
         aria-haspopup="menu"
         aria-expanded={open}
         title="Profilo e impostazioni"

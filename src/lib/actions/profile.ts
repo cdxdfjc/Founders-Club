@@ -152,6 +152,17 @@ export async function updatePassword(formData: FormData): Promise<void> {
   revalidatePath("/impostazioni");
 }
 
+export async function toggleDockAlumni(value: boolean): Promise<void> {
+  const { supabase, user } = await requireUser();
+
+  await supabase
+    .from("profiles")
+    .update({ is_dock_alumni: value, updated_at: new Date().toISOString() })
+    .eq("id", user.id);
+
+  revalidateProfile();
+}
+
 export async function deleteMyAccount(formData: FormData): Promise<void> {
   const { supabase, user } = await requireUser();
 

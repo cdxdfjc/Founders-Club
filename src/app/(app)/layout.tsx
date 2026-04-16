@@ -129,7 +129,15 @@ export default async function AppLayout({
 
       <footer className="mx-auto max-w-[1200px] w-full px-4 sm:px-8 py-6 sm:py-8">
         <div className="glass rounded-2xl px-4 sm:px-5 py-3 sm:py-4 flex flex-wrap items-center justify-between gap-3 text-xs sm:text-sm text-ink/60">
-          <div>© {new Date().getFullYear()} Founders Club</div>
+          <div className="flex items-center gap-1.5">
+            <span>© {new Date().getFullYear()} Founders Club</span>
+            <span className="text-ink/20">·</span>
+            <span className="flex items-center gap-1">
+              Nata in
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/dock-logo.png" alt="Dock Startup Lab" className="h-4 sm:h-5 w-auto inline-block opacity-70" />
+            </span>
+          </div>
           <div className="hidden sm:block">Chi non parte non arriva 🦄</div>
         </div>
       </footer>

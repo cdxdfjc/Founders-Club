@@ -9,6 +9,7 @@ type ProfileRow = {
   full_name: string | null;
   avatar_url: string | null;
   is_mentor: boolean;
+  is_dock_alumni: boolean;
   age: number | null;
   city: string | null;
   occupation: string | null;
@@ -35,7 +36,7 @@ export default async function CommunityPage({
   const { data: profiles } = await supabase
     .from("profiles")
     .select(
-      "id, username, full_name, avatar_url, is_mentor, age, city, occupation",
+      "id, username, full_name, avatar_url, is_mentor, is_dock_alumni, age, city, occupation",
     )
     .order("created_at", { ascending: false })
     .limit(500);
@@ -176,6 +177,16 @@ function MemberCard({
                 }}
               >
                 MENTOR
+              </span>
+            )}
+            {profile.is_dock_alumni && (
+              <span
+                className="text-[10px] font-bold px-2 py-0.5 rounded-full text-white"
+                style={{
+                  background: "linear-gradient(135deg, #3B6BAA, #D4586A)",
+                }}
+              >
+                DOCK
               </span>
             )}
           </div>

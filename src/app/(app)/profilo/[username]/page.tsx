@@ -18,7 +18,7 @@ export default async function ProfilePage({
   const { data: profile } = await supabase
     .from("profiles")
     .select(
-      "id, username, full_name, bio, city, age, occupation, avatar_url, contact_email, contact_telegram, contact_linkedin, contact_twitter, contact_instagram, contact_website, is_mentor",
+      "id, username, full_name, bio, city, age, occupation, avatar_url, contact_email, contact_telegram, contact_linkedin, contact_twitter, contact_instagram, contact_website, is_mentor, is_dock_alumni",
     )
     .eq("username", username)
     .maybeSingle();
@@ -83,6 +83,16 @@ export default async function ProfilePage({
                       }}
                     >
                       ✨ Mentor
+                    </span>
+                  )}
+                  {profile.is_dock_alumni && (
+                    <span
+                      className="px-3 py-1 rounded-full text-xs font-bold text-white"
+                      style={{
+                        background: "linear-gradient(135deg, #3B6BAA, #D4586A)",
+                      }}
+                    >
+                      🚀 Dock Alumni
                     </span>
                   )}
                 </div>
