@@ -42,6 +42,19 @@ export function ChatView({
     markAsRead(conversationId);
   }, [conversationId]);
 
+  // Fetch all messages from the client (fallback + polling)
+  const refreshMessages = useCallback(async () => {
+    const supabase = createClient();
+    const { data } = await supabase
+      .from("messages")
+      .select("id, sender_id, body, created_at")
+      .eq("conversation_id", conversationId)
+      .order("created_at", { ascending: true });
+    if (data) {
+      setMessages(data as Message[]);
+    }
+  }, [conversationId]);
+
   // Realtime subscription
   useEffect(() => {
     const supabase = createClient();
@@ -59,7 +72,7 @@ export function ChatView({
         (payload) => {
           const newMsg = payload.new as Message;
           setMessages((prev) => {
-            // Skip if already present (from optimistic update or duplicate)
+            // Skip if already present
             if (prev.some((m) => m.id === newMsg.id)) return prev;
             // Replace optimistic message if it matches
             const withoutOptimistic = prev.filter(
@@ -84,6 +97,12 @@ export function ChatView({
     };
   }, [conversationId, currentUserId]);
 
+  // Poll for new messages every 3 seconds (reliable fallback if Realtime isn't active)
+  useEffect(() => {
+    const interval = setInterval(refreshMessages, 3000);
+    return () => clearInterval(interval);
+  }, [refreshMessages]);
+
   // Optimistic send
   const handleSubmit = useCallback(
     async (formData: FormData) => {
@@ -105,10 +124,11 @@ export function ChatView({
         textareaRef.current.style.height = "44px";
       }
 
-      // Send to server
+      // Send to server, then fetch real messages to replace optimistic
       await sendMessage(formData);
+      await refreshMessages();
     },
-    [currentUserId],
+    [currentUserId, refreshMessages],
   );
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
