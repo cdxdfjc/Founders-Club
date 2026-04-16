@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { ProjectCard } from "@/components/ProjectCard";
+import {
+  ProjectPreviewCard,
+  ProjectClosedCard,
+} from "@/components/ProjectPreviewCard";
 
 export default async function ProfilePage({
   params,
@@ -137,27 +140,31 @@ export default async function ProfilePage({
         )}
       </div>
 
-      {/* Progetti */}
-      {projects.length > 0 && (
-        <section className="mt-8 space-y-8">
-          <ProjectGroup
-            emoji="🟢"
-            title="In corso"
-            projects={inCorso}
-            isOwner={isOwnProfile}
-          />
-          <ProjectGroup
-            emoji="✅"
-            title="Completati"
-            projects={completati}
-            isOwner={isOwnProfile}
-          />
-          <ProjectGroup
-            emoji="🔴"
-            title="Chiusi"
-            projects={chiusi}
-            isOwner={isOwnProfile}
-          />
+      {/* Portfolio — In corso & Completati */}
+      {(inCorso.length > 0 || completati.length > 0) && (
+        <section className="mt-8">
+          <h2 className="font-display font-semibold text-2xl mb-5 flex items-center gap-2">
+            <span>🚀</span> Portfolio
+          </h2>
+          <div className="grid sm:grid-cols-2 gap-5">
+            {[...inCorso, ...completati].map((p) => (
+              <ProjectPreviewCard key={p.id} project={p} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Progetti chiusi — sezione discreta */}
+      {chiusi.length > 0 && (
+        <section className="mt-8">
+          <h2 className="font-display font-semibold text-lg mb-3 text-ink/50 flex items-center gap-2">
+            <span>📦</span> Archivio
+          </h2>
+          <div className="space-y-2">
+            {chiusi.map((p) => (
+              <ProjectClosedCard key={p.id} project={p} />
+            ))}
+          </div>
         </section>
       )}
 
@@ -185,47 +192,6 @@ export default async function ProfilePage({
       {/* Contatti */}
       <ContactsBlock profile={profile} />
     </article>
-  );
-}
-
-type ProjectRow = {
-  id: string;
-  name: string;
-  description: string | null;
-  url: string | null;
-  status: string | null;
-  year_start: number | null;
-  year_end: number | null;
-  revenue_note: string | null;
-};
-
-function ProjectGroup({
-  emoji,
-  title,
-  projects,
-  isOwner,
-}: {
-  emoji: string;
-  title: string;
-  projects: ProjectRow[];
-  isOwner: boolean;
-}) {
-  if (projects.length === 0) return null;
-  return (
-    <div>
-      <h2 className="font-display font-semibold text-xl mb-3 flex items-center gap-2">
-        <span>{emoji}</span>
-        <span>{title}</span>
-        <span className="text-ink/40 text-base font-normal">
-          ({projects.length})
-        </span>
-      </h2>
-      <div className="grid sm:grid-cols-2 gap-4">
-        {projects.map((p) => (
-          <ProjectCard key={p.id} project={p} isOwner={isOwner} />
-        ))}
-      </div>
-    </div>
   );
 }
 

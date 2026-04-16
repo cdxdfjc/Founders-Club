@@ -15,6 +15,12 @@ export default async function NuovoProgettoPage() {
     .select("slug, name, emoji")
     .order("name");
 
+  const { data: allProfiles } = await supabase
+    .from("profiles")
+    .select("id, username, full_name")
+    .neq("id", user.id)
+    .order("username");
+
   return (
     <div className="max-w-2xl mx-auto rise">
       <Link
@@ -35,7 +41,7 @@ export default async function NuovoProgettoPage() {
         </p>
       </header>
 
-      <NuovoProgettoForm categories={categories ?? []} />
+      <NuovoProgettoForm categories={categories ?? []} candidates={allProfiles ?? []} />
     </div>
   );
 }

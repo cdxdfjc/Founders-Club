@@ -83,18 +83,40 @@ export async function addProject(formData: FormData): Promise<void> {
   const name = str(formData.get("name"));
   if (!name) return;
 
-  await supabase.from("user_projects").insert({
-    user_id: user.id,
-    name,
-    description: str(formData.get("description")),
-    url: str(formData.get("url")),
-    status: statusOrDefault(formData.get("status")),
-    year_start: intOrNull(formData.get("year_start")),
-    year_end: intOrNull(formData.get("year_end")),
-    revenue_note: str(formData.get("revenue_note")),
-  });
+  const { data: project } = await supabase
+    .from("user_projects")
+    .insert({
+      user_id: user.id,
+      name,
+      description: str(formData.get("description")),
+      url: str(formData.get("url")),
+      status: statusOrDefault(formData.get("status")),
+      year_start: intOrNull(formData.get("year_start")),
+      year_end: intOrNull(formData.get("year_end")),
+      revenue_note: str(formData.get("revenue_note")),
+    })
+    .select("id")
+    .single();
+
+  // Invita i membri selezionati
+  if (project) {
+    const inviteeIds = formData.getAll("invitee_ids");
+    const rows = inviteeIds
+      .map((v) => (typeof v === "string" ? v.trim() : ""))
+      .filter((id) => id && id !== user.id)
+      .map((id) => ({
+        user_project_id: project.id,
+        inviter_id: user.id,
+        invitee_id: id,
+      }));
+
+    if (rows.length > 0) {
+      await supabase.from("user_project_invites").insert(rows);
+    }
+  }
 
   revalidateProfile();
+  revalidatePath("/messaggi");
 }
 
 export async function updateProject(formData: FormData): Promise<void> {

@@ -88,7 +88,25 @@ export async function createProject(formData: FormData): Promise<void> {
     .select("id")
     .single();
 
+  // Invita i membri selezionati
+  if (created) {
+    const inviteeIds = formData.getAll("invitee_ids");
+    const rows = inviteeIds
+      .map((v) => (typeof v === "string" ? v.trim() : ""))
+      .filter((id) => id && id !== user.id)
+      .map((id) => ({
+        project_id: created.id,
+        inviter_id: user.id,
+        invitee_id: id,
+      }));
+
+    if (rows.length > 0) {
+      await supabase.from("project_invites").insert(rows);
+    }
+  }
+
   revalidatePath("/progetti");
+  revalidatePath("/messaggi");
 
   if (created) redirect(`/progetti/${created.id}`);
 }

@@ -3,8 +3,15 @@
 import { useState, useTransition } from "react";
 import { assistUserProject } from "@/lib/actions/ai";
 import { addProject } from "@/lib/actions/profile";
+import { TeamPicker } from "@/components/TeamPicker";
 
 type Status = "in_corso" | "completato" | "chiuso";
+
+type Candidate = {
+  id: string;
+  username: string;
+  full_name: string | null;
+};
 
 const EMPTY = {
   name: "",
@@ -16,7 +23,11 @@ const EMPTY = {
   status: "in_corso" as Status,
 };
 
-export function NewUserProjectForm() {
+export function NewUserProjectForm({
+  candidates = [],
+}: {
+  candidates?: Candidate[];
+}) {
   const [open, setOpen] = useState(false);
   const [showAI, setShowAI] = useState(false);
   const [rawText, setRawText] = useState("");
@@ -25,12 +36,14 @@ export function NewUserProjectForm() {
   const [savePending, startSave] = useTransition();
 
   const [values, setValues] = useState(EMPTY);
+  const [team, setTeam] = useState<Candidate[]>([]);
 
   const reset = () => {
     setValues(EMPTY);
     setRawText("");
     setAiError(null);
     setShowAI(false);
+    setTeam([]);
   };
 
   const close = () => {
@@ -240,6 +253,14 @@ export function NewUserProjectForm() {
         value={values.url}
         onChange={(e) => setValues((v) => ({ ...v, url: e.target.value }))}
       />
+
+      {candidates.length > 0 && (
+        <TeamPicker
+          candidates={candidates}
+          selected={team}
+          onChange={setTeam}
+        />
+      )}
 
       <div className="pt-1 flex items-center gap-3">
         <button

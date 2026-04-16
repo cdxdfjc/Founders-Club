@@ -34,6 +34,14 @@ export default async function ImpostazioniPage() {
     .order("year_start", { ascending: false, nullsFirst: false })
     .order("created_at", { ascending: false });
 
+  // Candidati per inviti (tutti tranne me)
+  const { data: allProfiles } = await supabase
+    .from("profiles")
+    .select("id, username, full_name")
+    .neq("id", user.id)
+    .order("username");
+  const candidates = allProfiles ?? [];
+
   const initial = (profile.full_name ?? profile.username)
     .charAt(0)
     .toUpperCase();
@@ -121,7 +129,7 @@ export default async function ImpostazioniPage() {
           )}
 
           {/* Aggiungi nuovo — con AI helper */}
-          <NewUserProjectForm />
+          <NewUserProjectForm candidates={candidates} />
         </div>
       </Section>
 

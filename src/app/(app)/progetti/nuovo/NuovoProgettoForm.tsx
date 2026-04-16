@@ -6,10 +6,18 @@ import { createProject } from "@/lib/actions/projects";
 import { assistProjectDraft } from "@/lib/actions/ai";
 import { STAGES } from "@/lib/projects";
 import { SubmitButton } from "@/components/SubmitButton";
+import { TeamPicker } from "@/components/TeamPicker";
 
 type Category = { slug: string; name: string; emoji: string | null };
+type Candidate = { id: string; username: string; full_name: string | null };
 
-export function NuovoProgettoForm({ categories }: { categories: Category[] }) {
+export function NuovoProgettoForm({
+  categories,
+  candidates = [],
+}: {
+  categories: Category[];
+  candidates?: Candidate[];
+}) {
   const [rawIdea, setRawIdea] = useState("");
   const [aiPending, startAi] = useTransition();
   const [aiError, setAiError] = useState<string | null>(null);
@@ -23,6 +31,7 @@ export function NuovoProgettoForm({ categories }: { categories: Category[] }) {
   const [description, setDescription] = useState("");
   const [tags, setTags] = useState("");
   const [url, setUrl] = useState("");
+  const [team, setTeam] = useState<Candidate[]>([]);
 
   function runAssist() {
     setAiError(null);
@@ -212,6 +221,14 @@ export function NuovoProgettoForm({ categories }: { categories: Category[] }) {
             onChange={(e) => setUrl(e.target.value)}
           />
         </Field>
+
+        {candidates.length > 0 && (
+          <TeamPicker
+            candidates={candidates}
+            selected={team}
+            onChange={setTeam}
+          />
+        )}
 
         <div className="flex items-center justify-between pt-2">
           <Link href="/progetti" className="btn-ghost !py-2.5 !px-5 !text-sm">
