@@ -7,6 +7,7 @@ import {
   declineUserProjectInvite,
 } from "@/lib/actions/user-project-invites";
 import { SubmitButton } from "@/components/SubmitButton";
+import { ConversationList } from "@/components/ConversationList";
 
 type InviteRow = {
   id: string;
@@ -22,7 +23,11 @@ type PortfolioInviteRow = {
   message: string | null;
   status: string;
   created_at: string;
-  user_project: { id: string; name: string; description: string | null } | null;
+  user_project: {
+    id: string;
+    name: string;
+    description: string | null;
+  } | null;
   inviter: { username: string; full_name: string | null } | null;
 };
 
@@ -48,7 +53,6 @@ export default async function MessaggiPage() {
 
   const list = (invites as unknown as InviteRow[] | null) ?? [];
 
-  // Inviti ai progetti portfolio (user_projects)
   const { data: portfolioInvites } = await supabase
     .from("user_project_invites")
     .select(
@@ -65,194 +69,250 @@ export default async function MessaggiPage() {
   const portfolioList =
     (portfolioInvites as unknown as PortfolioInviteRow[] | null) ?? [];
 
+  const hasInvites = list.length > 0 || portfolioList.length > 0;
+
+  // Conversazioni per mobile view
+  const { data: rawConvos } = await supabase
+    .from("conversations")
+    .select("id, user_a, user_b, last_message_at")
+    .or(`user_a.eq.${user.id},user_b.eq.${user.id}`)
+    .order("last_message_at", { ascending: false });
+
+  const mobileConversations = await Promise.all(
+    (
+      rawConvos ?? []
+    ).map(
+      async (c: {
+        id: string;
+        user_a: string;
+        user_b: string;
+        last_message_at: string;
+      }) => {
+        const otherId = c.user_a === user.id ? c.user_b : c.user_a;
+        const [{ data: profile }, { data: lastMsg }, { count: unreadCount }] =
+          await Promise.all([
+            supabase
+              .from("profiles")
+              .select("username, full_name")
+              .eq("id", otherId)
+              .maybeSingle(),
+            supabase
+              .from("messages")
+              .select("body")
+              .eq("conversation_id", c.id)
+              .order("created_at", { ascending: false })
+              .limit(1)
+              .maybeSingle(),
+            supabase
+              .from("messages")
+              .select("id", { count: "exact", head: true })
+              .eq("conversation_id", c.id)
+              .eq("recipient_id", user.id)
+              .is("read_at", null),
+          ]);
+        return {
+          id: c.id,
+          other_username: profile?.username ?? "utente",
+          other_full_name: profile?.full_name ?? null,
+          last_message_body: lastMsg?.body ?? null,
+          last_message_at: c.last_message_at,
+          unread_count: unreadCount ?? 0,
+        };
+      },
+    ),
+  );
+
   return (
-    <div className="rise max-w-3xl mx-auto space-y-8">
-      <header>
-        <h1 className="font-display-tight font-semibold text-3xl sm:text-5xl md:text-6xl leading-none tracking-tighter">
-          La tua <span className="gradient-text">inbox</span>
-        </h1>
-        <p className="mt-3 text-ink/60">
-          Inviti ai progetti e (presto) messaggi privati. Tutto in un posto.
-        </p>
-      </header>
-
-      {/* SEZIONE INVITI */}
-      <section>
-        <div className="flex items-center gap-3 mb-4">
-          <h2 className="font-display font-semibold text-2xl flex items-center gap-2">
-            <span>📬</span> Inviti ai progetti
-          </h2>
-          {list.length > 0 && (
-            <span
-              className="text-xs font-bold px-2.5 py-1 rounded-full text-white"
-              style={{
-                background: "linear-gradient(135deg, #EF9CDA, #89A1EF)",
-              }}
-            >
-              {list.length}
-            </span>
-          )}
-        </div>
-
-        {list.length === 0 ? (
+    <div className="space-y-6">
+      {/* Mobile: pulsante nuovo messaggio + lista conversazioni */}
+      <div className="sm:hidden space-y-3">
+        <Link
+          href="/messaggi/nuovo"
+          className="btn-gradient !py-2.5 !px-4 !text-sm w-full text-center"
+        >
+          + Nuovo messaggio
+        </Link>
+        {mobileConversations.length > 0 ? (
+          <ConversationList
+            initialConversations={mobileConversations}
+            currentUserId={user.id}
+          />
+        ) : (
           <div className="card p-8 text-center">
-            <div className="text-4xl mb-2">📭</div>
-            <p className="text-ink/60">
-              Nessun invito pendente. Quando qualcuno ti chiamerà a bordo del
-              suo progetto lo vedrai qui.
+            <div className="text-4xl mb-2">💬</div>
+            <p className="text-ink/60 text-sm">
+              Nessuna conversazione ancora. Scrivi a qualcuno!
             </p>
           </div>
-        ) : (
-          <div className="space-y-4">
-            {list.map((inv) => {
-              const inviterName =
-                inv.inviter?.full_name ?? inv.inviter?.username ?? "qualcuno";
-              return (
-                <div key={inv.id} className="card p-4 sm:p-6">
-                  <div className="min-w-0">
-                    <p className="text-sm text-ink/60">
-                      <strong className="text-ink/80">{inviterName}</strong>{" "}
-                      ti ha invitato a entrare in
-                    </p>
-                    {inv.project ? (
-                      <Link
-                        href={`/progetti/${inv.project.id}`}
-                        className="mt-1 block font-display font-semibold text-2xl leading-tight hover:underline"
-                      >
-                        💡 {inv.project.title}
-                      </Link>
-                    ) : (
-                      <p className="mt-1 font-display font-semibold text-2xl text-ink/40">
-                        (progetto eliminato)
-                      </p>
-                    )}
-                    {inv.project?.tagline && (
-                      <p className="mt-1 text-sm text-ink/60">
-                        {inv.project.tagline}
-                      </p>
-                    )}
-                    {inv.message && (
-                      <blockquote className="mt-3 text-sm text-ink/70 italic border-l-2 border-ink/15 pl-3">
-                        &ldquo;{inv.message}&rdquo;
-                      </blockquote>
-                    )}
-                  </div>
-
-                  <div className="mt-5 flex items-center gap-2">
-                    <form action={acceptInvite}>
-                      <input type="hidden" name="invite_id" value={inv.id} />
-                      <SubmitButton
-                        className="btn-gradient !py-2.5 !px-5 !text-sm"
-                        pendingLabel="Entro…"
-                      >
-                        ✓ Accetta
-                      </SubmitButton>
-                    </form>
-                    <form action={declineInvite}>
-                      <input type="hidden" name="invite_id" value={inv.id} />
-                      <SubmitButton
-                        className="btn-ghost !py-2.5 !px-5 !text-sm"
-                        pendingLabel="…"
-                      >
-                        Rifiuta
-                      </SubmitButton>
-                    </form>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
         )}
-      </section>
+      </div>
 
-      {/* INVITI PORTFOLIO */}
-      {portfolioList.length > 0 && (
-        <section>
-          <div className="flex items-center gap-3 mb-4">
-            <h2 className="font-display font-semibold text-2xl flex items-center gap-2">
-              <span>🚀</span> Inviti al portfolio
-            </h2>
-            <span
-              className="text-xs font-bold px-2.5 py-1 rounded-full text-white"
-              style={{
-                background: "linear-gradient(135deg, #32CBFF, #89A1EF)",
-              }}
-            >
-              {portfolioList.length}
-            </span>
-          </div>
-          <div className="space-y-4">
-            {portfolioList.map((inv) => {
-              const inviterName =
-                inv.inviter?.full_name ?? inv.inviter?.username ?? "qualcuno";
-              return (
-                <div key={inv.id} className="card p-4 sm:p-6">
-                  <div className="min-w-0">
-                    <p className="text-sm text-ink/60">
-                      <strong className="text-ink/80">{inviterName}</strong> ti
-                      ha invitato a collaborare su
-                    </p>
-                    {inv.user_project ? (
-                      <p className="mt-1 font-display font-semibold text-2xl leading-tight">
-                        🚀 {inv.user_project.name}
-                      </p>
-                    ) : (
-                      <p className="mt-1 font-display font-semibold text-2xl text-ink/40">
-                        (progetto eliminato)
-                      </p>
-                    )}
-                    {inv.user_project?.description && (
-                      <p className="mt-1 text-sm text-ink/60">
-                        {inv.user_project.description}
-                      </p>
-                    )}
-                    {inv.message && (
-                      <blockquote className="mt-3 text-sm text-ink/70 italic border-l-2 border-ink/15 pl-3">
-                        &ldquo;{inv.message}&rdquo;
-                      </blockquote>
-                    )}
-                  </div>
-                  <div className="mt-5 flex items-center gap-2">
-                    <form action={acceptUserProjectInvite}>
-                      <input type="hidden" name="invite_id" value={inv.id} />
-                      <SubmitButton
-                        className="btn-gradient !py-2.5 !px-5 !text-sm"
-                        pendingLabel="Entro..."
-                      >
-                        Accetta
-                      </SubmitButton>
-                    </form>
-                    <form action={declineUserProjectInvite}>
-                      <input type="hidden" name="invite_id" value={inv.id} />
-                      <SubmitButton
-                        className="btn-ghost !py-2.5 !px-5 !text-sm"
-                        pendingLabel="..."
-                      >
-                        Rifiuta
-                      </SubmitButton>
-                    </form>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-      )}
-
-      {/* SEZIONE MESSAGGI (placeholder) */}
-      <section>
-        <h2 className="font-display font-semibold text-2xl mb-4 flex items-center gap-2">
-          <span>✉️</span> Messaggi privati
-        </h2>
-        <div className="card p-8 text-center opacity-70">
-          <div className="text-4xl mb-2">🚧</div>
-          <p className="font-semibold">Presto disponibili</p>
-          <p className="text-sm text-ink/60 mt-1 max-w-md mx-auto">
-            Chat 1-a-1 con mentor e altri founder. Stiamo lavorando per
-            aprirla al più presto.
+      {/* Desktop: stato vuoto quando nessuna chat è selezionata */}
+      <div className="hidden sm:block">
+        <div className="card p-12 text-center">
+          <div className="text-5xl mb-3">💬</div>
+          <h3 className="font-display font-semibold text-xl">
+            Seleziona una conversazione
+          </h3>
+          <p className="mt-2 text-sm text-ink/60 max-w-sm mx-auto">
+            Scegli una conversazione dalla lista o iniziane una nuova.
           </p>
         </div>
-      </section>
+      </div>
+
+      {/* Inviti */}
+      {hasInvites && (
+        <>
+          {list.length > 0 && (
+            <section>
+              <div className="flex items-center gap-3 mb-4">
+                <h2 className="font-display font-semibold text-lg flex items-center gap-2">
+                  <span>📬</span> Inviti ai progetti
+                </h2>
+                <span
+                  className="text-xs font-bold px-2.5 py-1 rounded-full text-white"
+                  style={{
+                    background: "linear-gradient(135deg, #EF9CDA, #89A1EF)",
+                  }}
+                >
+                  {list.length}
+                </span>
+              </div>
+              <div className="space-y-3">
+                {list.map((inv) => {
+                  const inviterName =
+                    inv.inviter?.full_name ??
+                    inv.inviter?.username ??
+                    "qualcuno";
+                  return (
+                    <div key={inv.id} className="card p-4 sm:p-5">
+                      <p className="text-sm text-ink/60">
+                        <strong className="text-ink/80">{inviterName}</strong> ti
+                        ha invitato in{" "}
+                        {inv.project ? (
+                          <Link
+                            href={`/progetti/${inv.project.id}`}
+                            className="font-semibold hover:underline"
+                          >
+                            {inv.project.title}
+                          </Link>
+                        ) : (
+                          <span className="text-ink/40">
+                            (progetto eliminato)
+                          </span>
+                        )}
+                      </p>
+                      {inv.message && (
+                        <blockquote className="mt-2 text-sm text-ink/70 italic border-l-2 border-ink/15 pl-3">
+                          &ldquo;{inv.message}&rdquo;
+                        </blockquote>
+                      )}
+                      <div className="mt-3 flex items-center gap-2">
+                        <form action={acceptInvite}>
+                          <input
+                            type="hidden"
+                            name="invite_id"
+                            value={inv.id}
+                          />
+                          <SubmitButton
+                            className="btn-gradient !py-2 !px-4 !text-xs"
+                            pendingLabel="..."
+                          >
+                            Accetta
+                          </SubmitButton>
+                        </form>
+                        <form action={declineInvite}>
+                          <input
+                            type="hidden"
+                            name="invite_id"
+                            value={inv.id}
+                          />
+                          <SubmitButton
+                            className="btn-ghost !py-2 !px-4 !text-xs"
+                            pendingLabel="..."
+                          >
+                            Rifiuta
+                          </SubmitButton>
+                        </form>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          )}
+
+          {portfolioList.length > 0 && (
+            <section>
+              <div className="flex items-center gap-3 mb-4">
+                <h2 className="font-display font-semibold text-lg flex items-center gap-2">
+                  <span>🚀</span> Inviti al portfolio
+                </h2>
+                <span
+                  className="text-xs font-bold px-2.5 py-1 rounded-full text-white"
+                  style={{
+                    background: "linear-gradient(135deg, #32CBFF, #89A1EF)",
+                  }}
+                >
+                  {portfolioList.length}
+                </span>
+              </div>
+              <div className="space-y-3">
+                {portfolioList.map((inv) => {
+                  const inviterName =
+                    inv.inviter?.full_name ??
+                    inv.inviter?.username ??
+                    "qualcuno";
+                  return (
+                    <div key={inv.id} className="card p-4 sm:p-5">
+                      <p className="text-sm text-ink/60">
+                        <strong className="text-ink/80">{inviterName}</strong> ti
+                        ha invitato a collaborare su{" "}
+                        <span className="font-semibold">
+                          {inv.user_project?.name ?? "(progetto eliminato)"}
+                        </span>
+                      </p>
+                      {inv.message && (
+                        <blockquote className="mt-2 text-sm text-ink/70 italic border-l-2 border-ink/15 pl-3">
+                          &ldquo;{inv.message}&rdquo;
+                        </blockquote>
+                      )}
+                      <div className="mt-3 flex items-center gap-2">
+                        <form action={acceptUserProjectInvite}>
+                          <input
+                            type="hidden"
+                            name="invite_id"
+                            value={inv.id}
+                          />
+                          <SubmitButton
+                            className="btn-gradient !py-2 !px-4 !text-xs"
+                            pendingLabel="..."
+                          >
+                            Accetta
+                          </SubmitButton>
+                        </form>
+                        <form action={declineUserProjectInvite}>
+                          <input
+                            type="hidden"
+                            name="invite_id"
+                            value={inv.id}
+                          />
+                          <SubmitButton
+                            className="btn-ghost !py-2 !px-4 !text-xs"
+                            pendingLabel="..."
+                          >
+                            Rifiuta
+                          </SubmitButton>
+                        </form>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          )}
+        </>
+      )}
     </div>
   );
 }

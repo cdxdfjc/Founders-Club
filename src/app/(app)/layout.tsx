@@ -32,6 +32,7 @@ export default async function AppLayout({
     { count: membersCount },
     { count: projectsCount },
     { count: openHelpCount },
+    { count: unreadMessageCount },
   ] = await Promise.all([
     supabase
       .from("project_invites")
@@ -44,6 +45,11 @@ export default async function AppLayout({
       .from("help_requests")
       .select("id", { count: "exact", head: true })
       .eq("status", "aperta"),
+    supabase
+      .from("messages")
+      .select("id", { count: "exact", head: true })
+      .eq("recipient_id", user.id)
+      .is("read_at", null),
   ]);
 
   return (
@@ -98,7 +104,7 @@ export default async function AppLayout({
                 title="Inbox"
               >
                 ✉️
-                {pendingInviteCount && pendingInviteCount > 0 ? (
+                {((pendingInviteCount ?? 0) + (unreadMessageCount ?? 0)) > 0 ? (
                   <span
                     className="absolute -top-0.5 -right-0.5 min-w-[16px] sm:min-w-[18px] h-[16px] sm:h-[18px] px-0.5 sm:px-1 rounded-full text-[9px] sm:text-[10px] font-bold text-white flex items-center justify-center"
                     style={{
@@ -106,7 +112,7 @@ export default async function AppLayout({
                         "linear-gradient(135deg, #EF9CDA, #89A1EF)",
                     }}
                   >
-                    {pendingInviteCount}
+                    {(pendingInviteCount ?? 0) + (unreadMessageCount ?? 0)}
                   </span>
                 ) : null}
               </Link>

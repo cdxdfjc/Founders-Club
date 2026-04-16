@@ -121,14 +121,21 @@ export default async function ProfilePage({
                 )}
               </div>
 
-              {isOwnProfile && (
+              {isOwnProfile ? (
                 <Link
                   href="/impostazioni"
                   className="btn-gradient !py-2.5 !px-5 !text-sm shrink-0"
                 >
                   ✏️ Modifica profilo
                 </Link>
-              )}
+              ) : user ? (
+                <Link
+                  href={`/messaggi/${profile.username}`}
+                  className="btn-ghost !py-2.5 !px-5 !text-sm shrink-0"
+                >
+                  ✉️ Messaggio
+                </Link>
+              ) : null}
             </div>
           </div>
         </div>

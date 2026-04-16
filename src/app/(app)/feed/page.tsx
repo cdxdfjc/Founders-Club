@@ -63,40 +63,64 @@ export default async function FeedPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name, username, avatar_url, bio, city, age, occupation")
+    .select(
+      "full_name, username, bio, city, occupation, contact_email, contact_telegram, contact_linkedin, contact_twitter, contact_instagram, contact_website",
+    )
     .eq("id", user!.id)
     .maybeSingle();
 
   const firstName =
     profile?.full_name?.split(" ")[0] ?? profile?.username ?? "founder";
 
-  const checks: { key: keyof NonNullable<typeof profile>; label: string }[] = [
-    { key: "full_name", label: "nome" },
-    { key: "avatar_url", label: "foto" },
-    { key: "bio", label: "bio" },
-    { key: "city", label: "città" },
-    { key: "age", label: "età" },
-    { key: "occupation", label: "professione" },
-  ];
-  const missingLabels = checks
-    .filter((c) => {
-      const v = profile?.[c.key];
-      return v === null || v === undefined || v === "";
-    })
-    .map((c) => c.label);
-  const total = checks.length;
+  // Step di completamento profilo — solo campi effettivamente compilabili
+  const missingLabels: string[] = [];
+  if (!profile?.full_name) missingLabels.push("nome");
+  if (!profile?.bio) missingLabels.push("bio");
+  if (!profile?.city) missingLabels.push("città");
+  if (!profile?.occupation) missingLabels.push("studio/lavoro");
+
+  const hasContact =
+    profile?.contact_email ||
+    profile?.contact_telegram ||
+    profile?.contact_linkedin ||
+    profile?.contact_twitter ||
+    profile?.contact_instagram ||
+    profile?.contact_website;
+  if (!hasContact) missingLabels.push("almeno un contatto");
+
+  const total = 5; // nome, bio, città, studio/lavoro, contatto
   const completed = total - missingLabels.length;
-  const showBanner = completed < total;
+  const profileComplete = completed === total;
+
+  // Check se ha almeno un progetto
+  const { count: projectCount } = await supabase
+    .from("user_projects")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", user!.id);
+
+  const hasProjects = (projectCount ?? 0) > 0;
 
   return (
     <div>
-      {showBanner && (
+      {!profileComplete ? (
         <ProfileCompletionBanner
           completed={completed}
           total={total}
           missingLabels={missingLabels}
         />
-      )}
+      ) : !hasProjects ? (
+        <ProfileCompletionBanner
+          completed={total}
+          total={total}
+          missingLabels={[]}
+          nextAction={{
+            label: "Aggiungi il tuo primo progetto",
+            href: "/impostazioni",
+            message:
+              "Profilo completo! Ora mostra alla community cosa stai costruendo.",
+          }}
+        />
+      ) : null}
       <div className="flex items-start justify-between gap-6 flex-wrap">
         <div className="rise">
           <div className="chip mb-4">
