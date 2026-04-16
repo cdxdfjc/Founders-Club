@@ -72,7 +72,6 @@ export function UserSearch({ currentUserId }: { currentUserId: string }) {
                   <p className="font-semibold truncate">
                     {p.full_name ?? p.username}
                   </p>
-                  <p className="text-xs text-ink/50">@{p.username}</p>
                 </div>
               </Link>
             );

@@ -44,14 +44,6 @@ export function ProfileForm({ username, initial }: Props) {
 
   return (
     <form onSubmit={onSubmit} className="space-y-4">
-      <Row label="Username" hint="Non modificabile (per ora)">
-        <input
-          className="field bg-ink/5 cursor-not-allowed"
-          value={`@${username}`}
-          disabled
-          readOnly
-        />
-      </Row>
 
       <Row label="Nome completo">
         <input

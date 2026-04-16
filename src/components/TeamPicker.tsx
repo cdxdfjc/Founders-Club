@@ -95,7 +95,6 @@ export function TeamPicker({
                   <p className="font-semibold text-sm">
                     {m.full_name ?? m.username}
                   </p>
-                  <p className="text-xs text-ink/50">@{m.username}</p>
                 </button>
               </li>
             ))}

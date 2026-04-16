@@ -189,7 +189,6 @@ export default async function ProgettoDettaglioPage({
                 <p className="font-semibold text-ink group-hover:underline">
                   {ownerName}
                 </p>
-                <p className="text-xs text-ink/50">@{owner?.username}</p>
               </div>
             </Link>
 

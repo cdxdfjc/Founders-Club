@@ -100,7 +100,6 @@ export default async function ProfilePage({
                   )}
                 </div>
                 <div className="mt-2 flex items-center gap-3 text-ink/60 flex-wrap">
-                  <span className="text-sm">@{profile.username}</span>
                   {profile.city && (
                     <>
                       <span>·</span>

@@ -57,7 +57,6 @@ export function InviteTeamBox({
             <p className="font-semibold text-sm truncate">
               {selected.full_name ?? selected.username}
             </p>
-            <p className="text-xs text-ink/50">@{selected.username}</p>
           </div>
           <button
             type="button"
@@ -92,7 +91,6 @@ export function InviteTeamBox({
                     <p className="font-semibold text-sm">
                       {m.full_name ?? m.username}
                     </p>
-                    <p className="text-xs text-ink/50">@{m.username}</p>
                   </button>
                 </li>
               ))}

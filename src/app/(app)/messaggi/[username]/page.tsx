@@ -80,7 +80,6 @@ export default async function ConversationPage({
           >
             {otherProfile.full_name ?? otherProfile.username}
           </Link>
-          <p className="text-xs text-ink/50">@{otherProfile.username}</p>
         </div>
       </div>
 
