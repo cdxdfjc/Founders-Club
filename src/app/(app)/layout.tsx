@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Logo } from "@/components/Logo";
 import { BackToFeed } from "@/components/BackToFeed";
 import { HeaderUserMenu } from "@/components/HeaderUserMenu";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
 
 export default async function AppLayout({
   children,
@@ -48,14 +49,14 @@ export default async function AppLayout({
   return (
     <div className="min-h-screen flex flex-col">
       <header className="sticky top-0 z-30">
-        <div className="mx-auto max-w-[1200px] px-4 sm:px-6 pt-4">
-          <div className="glass rounded-full pl-3 pr-2 py-2 flex items-center justify-between gap-3">
+        <div className="mx-auto max-w-[1200px] px-3 sm:px-6 pt-3 sm:pt-4">
+          <div className="glass rounded-full pl-2.5 sm:pl-3 pr-1.5 sm:pr-2 py-1.5 sm:py-2 flex items-center justify-between gap-2 sm:gap-3">
             <Logo size="sm" href="/feed" />
 
-            <nav className="flex items-center gap-0.5 sm:gap-1 text-sm">
+            <nav className="flex items-center gap-0 sm:gap-1 text-xs sm:text-sm">
               <Link
                 href="/community"
-                className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-full hover:bg-white/70 transition"
+                className="flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-3 py-1 sm:py-1.5 rounded-full hover:bg-white/70 transition"
                 title="Community"
               >
                 <span>🫂</span>
@@ -67,7 +68,7 @@ export default async function AppLayout({
               <span className="text-ink/20 hidden sm:inline">·</span>
               <Link
                 href="/progetti"
-                className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-full hover:bg-white/70 transition"
+                className="flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-3 py-1 sm:py-1.5 rounded-full hover:bg-white/70 transition"
                 title="Progetti"
               >
                 <span>💡</span>
@@ -79,7 +80,7 @@ export default async function AppLayout({
               <span className="text-ink/20 hidden sm:inline">·</span>
               <Link
                 href="/aiuto"
-                className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-full hover:bg-white/70 transition"
+                className="flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-3 py-1 sm:py-1.5 rounded-full hover:bg-white/70 transition"
                 title="Richieste d'aiuto aperte"
               >
                 <span>🙋</span>
@@ -90,16 +91,16 @@ export default async function AppLayout({
               </Link>
             </nav>
 
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1 sm:gap-1.5">
               <Link
                 href="/messaggi"
-                className="relative hidden sm:inline-flex w-9 h-9 rounded-full items-center justify-center hover:bg-white/70 transition"
+                className="relative inline-flex w-8 h-8 sm:w-9 sm:h-9 rounded-full items-center justify-center hover:bg-white/70 transition text-sm sm:text-base"
                 title="Inbox"
               >
                 ✉️
                 {pendingInviteCount && pendingInviteCount > 0 ? (
                   <span
-                    className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold text-white flex items-center justify-center"
+                    className="absolute -top-0.5 -right-0.5 min-w-[16px] sm:min-w-[18px] h-[16px] sm:h-[18px] px-0.5 sm:px-1 rounded-full text-[9px] sm:text-[10px] font-bold text-white flex items-center justify-center"
                     style={{
                       background:
                         "linear-gradient(135deg, #EF9CDA, #89A1EF)",
@@ -116,23 +117,24 @@ export default async function AppLayout({
               />
             </div>
           </div>
-
         </div>
       </header>
 
       <main className="flex-1">
-        <div className="mx-auto max-w-[1200px] px-5 sm:px-8 py-10 sm:py-14">
+        <div className="mx-auto max-w-[1200px] px-4 sm:px-8 py-6 sm:py-14">
           <BackToFeed />
           {children}
         </div>
       </main>
 
-      <footer className="mx-auto max-w-[1200px] w-full px-5 sm:px-8 py-8">
-        <div className="glass rounded-2xl px-5 py-4 flex flex-wrap items-center justify-between gap-3 text-sm text-ink/60">
+      <footer className="mx-auto max-w-[1200px] w-full px-4 sm:px-8 py-6 sm:py-8">
+        <div className="glass rounded-2xl px-4 sm:px-5 py-3 sm:py-4 flex flex-wrap items-center justify-between gap-3 text-xs sm:text-sm text-ink/60">
           <div>© {new Date().getFullYear()} Founders Club</div>
-          <div>Chi non parte non arriva 🦄</div>
+          <div className="hidden sm:block">Chi non parte non arriva 🦄</div>
         </div>
       </footer>
+
+      <MobileBottomNav />
     </div>
   );
 }

@@ -103,10 +103,10 @@ export default async function FeedPage() {
             <span className="w-2 h-2 rounded-full bg-fresh-sky animate-pulse"></span>
             Bentornato nella community
           </div>
-          <h1 className="font-display-tight font-semibold text-5xl sm:text-7xl leading-[0.9] tracking-tighter">
+          <h1 className="font-display-tight font-semibold text-3xl sm:text-5xl md:text-7xl leading-[0.9] tracking-tighter">
             Ciao <span className="gradient-text">{firstName}</span> 👋
           </h1>
-          <p className="mt-5 text-lg text-ink/70 max-w-xl">
+          <p className="mt-3 sm:mt-5 text-base sm:text-lg text-ink/70 max-w-xl">
             Fallo brutto, ma fallo. ✨
           </p>
         </div>
@@ -121,16 +121,16 @@ export default async function FeedPage() {
         </div>
       </div>
 
-      <div className="mt-14 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div className="mt-8 sm:mt-14 grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5">
         {CARDS.map((c, i) => (
           <Link
             key={c.href}
             href={c.href}
-            className="card p-6 group rise flex flex-col"
+            className="card p-4 sm:p-6 group rise flex flex-col"
             style={{ animationDelay: `${0.1 + i * 0.05}s` }}
           >
             <div
-              className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl mb-4 border transition-transform group-hover:scale-110 group-hover:rotate-6"
+              className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center text-xl sm:text-2xl mb-3 sm:mb-4 border transition-transform group-hover:scale-110 group-hover:rotate-6"
               style={{
                 background: `${c.color}30`,
                 borderColor: `${c.color}55`,
@@ -138,9 +138,9 @@ export default async function FeedPage() {
             >
               {c.emoji}
             </div>
-            <h3 className="font-display font-semibold text-xl">{c.title}</h3>
-            <p className="mt-1 text-ink/60 text-sm min-h-[2.5rem]">{c.body}</p>
-            <div className="mt-auto pt-4 text-sm font-semibold text-ink/40 group-hover:text-ink transition-colors">
+            <h3 className="font-display font-semibold text-base sm:text-xl">{c.title}</h3>
+            <p className="mt-1 text-ink/60 text-xs sm:text-sm min-h-0 sm:min-h-[2.5rem] line-clamp-2">{c.body}</p>
+            <div className="mt-auto pt-3 sm:pt-4 text-xs sm:text-sm font-semibold text-ink/40 group-hover:text-ink transition-colors">
               Apri →
             </div>
           </Link>

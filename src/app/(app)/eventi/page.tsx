@@ -84,7 +84,7 @@ export default async function EventiPage({
           >
             ☕ Meetup
           </span>
-          <h1 className="font-display-tight font-semibold text-5xl sm:text-6xl leading-none tracking-tighter">
+          <h1 className="font-display-tight font-semibold text-3xl sm:text-5xl md:text-6xl leading-none tracking-tighter">
             Incontriamoci di <span className="gradient-text">persona</span>
           </h1>
           <p className="mt-3 text-ink/60 max-w-xl">
@@ -144,8 +144,8 @@ function EventCard({ ev, count }: { ev: Row; count: number }) {
       className="card p-0 flex flex-col group overflow-hidden"
     >
       <div className="h-1.5 w-full" style={{ background: EVENTS_GRADIENT }} />
-      <div className="p-6 flex flex-col flex-1">
-        <div className="flex items-start gap-4">
+      <div className="p-4 sm:p-6 flex flex-col flex-1">
+        <div className="flex items-start gap-3 sm:gap-4">
           <div
             className="shrink-0 w-16 rounded-2xl flex flex-col items-center justify-center py-2 text-white shadow-sm"
             style={{ background: EVENTS_GRADIENT }}

@@ -48,7 +48,7 @@ export default async function ProfilePage({
   return (
     <article className="max-w-4xl mx-auto rise">
       {/* Banner card */}
-      <div className="card p-8 sm:p-10 relative overflow-hidden">
+      <div className="card p-5 sm:p-10 relative overflow-hidden">
         <div
           className="absolute inset-0 opacity-70"
           style={{
@@ -59,7 +59,7 @@ export default async function ProfilePage({
 
         <div className="relative flex flex-col sm:flex-row items-start gap-6">
           <div
-            className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl flex items-center justify-center text-white text-5xl font-display font-semibold shrink-0 shadow-lg"
+            className="w-18 h-18 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-2xl sm:rounded-3xl flex items-center justify-center text-white text-3xl sm:text-5xl font-display font-semibold shrink-0 shadow-lg"
             style={{
               background:
                 "linear-gradient(135deg, #32CBFF, #89A1EF 50%, #EF9CDA)",
@@ -72,7 +72,7 @@ export default async function ProfilePage({
             <div className="flex items-start justify-between gap-3 flex-wrap">
               <div className="min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h1 className="font-display-tight font-semibold text-4xl sm:text-5xl leading-none tracking-tighter">
+                  <h1 className="font-display-tight font-semibold text-2xl sm:text-4xl md:text-5xl leading-none tracking-tighter">
                     {profile.full_name ?? profile.username}
                   </h1>
                   {profile.is_mentor && (

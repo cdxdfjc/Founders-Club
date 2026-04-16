@@ -132,7 +132,7 @@ export default async function ProgettoDettaglioPage({
       </Link>
 
       {/* HERO */}
-      <header className="card p-8 sm:p-10 relative overflow-hidden">
+      <header className="card p-5 sm:p-10 relative overflow-hidden">
         <div
           className="absolute inset-0 opacity-60 pointer-events-none"
           style={{
@@ -161,7 +161,7 @@ export default async function ProgettoDettaglioPage({
             )}
           </div>
 
-          <h1 className="font-display-tight font-semibold text-5xl sm:text-6xl leading-[0.95] tracking-tighter">
+          <h1 className="font-display-tight font-semibold text-3xl sm:text-5xl md:text-6xl leading-[0.95] tracking-tighter">
             {project.title}
           </h1>
           {project.tagline && (
@@ -242,7 +242,7 @@ export default async function ProgettoDettaglioPage({
       </header>
 
       {/* DESCRIZIONE */}
-      <section className="card p-7 sm:p-9">
+      <section className="card p-5 sm:p-9">
         <h2 className="font-display font-semibold text-2xl mb-4 flex items-center gap-2">
           <span>📖</span> Descrizione
         </h2>
@@ -270,7 +270,7 @@ export default async function ProgettoDettaglioPage({
 
       {/* JOIN REQUEST */}
       {!isOwner && (
-        <section className="card p-7 sm:p-9">
+        <section className="card p-5 sm:p-9">
           <h2 className="font-display font-semibold text-2xl mb-2 flex items-center gap-2">
             <span>🤝</span> Vuoi entrare nel team?
           </h2>
@@ -310,7 +310,7 @@ export default async function ProgettoDettaglioPage({
 
       {/* INVITA AL TEAM */}
       {canInvite && (
-        <section className="card p-7 sm:p-9">
+        <section className="card p-5 sm:p-9">
           <h2 className="font-display font-semibold text-2xl mb-2 flex items-center gap-2">
             <span>✉️</span> Invita qualcuno nel team
           </h2>
@@ -366,7 +366,7 @@ export default async function ProgettoDettaglioPage({
       )}
 
       {/* COMMENTI */}
-      <section className="card p-7 sm:p-9">
+      <section className="card p-5 sm:p-9">
         <h2 className="font-display font-semibold text-2xl mb-4 flex items-center gap-2">
           <span>💬</span> Commenti
         </h2>

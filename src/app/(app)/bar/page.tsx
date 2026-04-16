@@ -48,7 +48,7 @@ export default async function BarPage() {
             <span>🍺</span>
             <span className="font-semibold">Bar</span>
           </div>
-          <h1 className="font-display-tight font-semibold text-5xl sm:text-6xl leading-none tracking-tighter">
+          <h1 className="font-display-tight font-semibold text-3xl sm:text-5xl md:text-6xl leading-none tracking-tighter">
             Chiacchiere <span className="gradient-text">al bancone</span>
           </h1>
           <p className="mt-3 text-ink/60 max-w-xl">
@@ -70,10 +70,10 @@ export default async function BarPage() {
               <Link
                 key={t.id}
                 href={`/bar/${t.id}`}
-                className="card p-5 flex items-start gap-4 group"
+                className="card p-4 sm:p-5 flex items-start gap-3 sm:gap-4 group"
               >
                 <span
-                  className="w-11 h-11 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0"
+                  className="w-9 h-9 sm:w-11 sm:h-11 rounded-full flex items-center justify-center text-white text-xs sm:text-sm font-bold shrink-0"
                   style={{
                     background:
                       "linear-gradient(135deg, #32CBFF, #89A1EF, #EF9CDA)",

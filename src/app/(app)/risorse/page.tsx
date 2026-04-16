@@ -53,7 +53,7 @@ export default async function RisorsePage({
       {/* HEADER */}
       <header className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
-          <h1 className="font-display-tight font-semibold text-5xl sm:text-6xl leading-none tracking-tighter">
+          <h1 className="font-display-tight font-semibold text-3xl sm:text-5xl md:text-6xl leading-none tracking-tighter">
             Risorse &{" "}
             <span
               className="bg-clip-text text-transparent"
@@ -257,7 +257,7 @@ function ResourceCard({ r }: { r: ResourceCardData }) {
         </div>
       ) : null}
 
-      <div className="p-6 flex flex-col flex-1">
+      <div className="p-4 sm:p-6 flex flex-col flex-1">
         {/* Top row: category + host */}
         <div className="flex items-center justify-between gap-2 mb-3">
           {r.category ? (

@@ -126,7 +126,7 @@ export function HeaderUserMenu({ firstName, username, avatarUrl }: Props) {
         aria-haspopup="menu"
         aria-expanded={open}
         title="Profilo e impostazioni"
-        className="flex items-center gap-2 pl-1 pr-3 py-1 rounded-full bg-white/60 hover:bg-white transition border border-ink/5 shadow-sm"
+        className="flex items-center gap-1.5 sm:gap-2 pl-1 pr-2 sm:pr-3 py-1 rounded-full bg-white/60 hover:bg-white transition border border-ink/5 shadow-sm"
       >
         {avatarUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -145,9 +145,9 @@ export function HeaderUserMenu({ firstName, username, avatarUrl }: Props) {
             {initial}
           </span>
         )}
-        <span className="text-sm font-semibold">Profilo</span>
+        <span className="text-sm font-semibold hidden sm:inline">Profilo</span>
         <span
-          className="text-ink/50 text-[10px] transition-transform"
+          className="text-ink/50 text-[10px] transition-transform hidden sm:inline"
           style={{ transform: open ? "rotate(180deg)" : "rotate(0deg)" }}
         >
           ▾

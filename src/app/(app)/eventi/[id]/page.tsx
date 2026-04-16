@@ -78,7 +78,7 @@ export default async function EventoPage({
 
   return (
     <article className="max-w-3xl mx-auto rise space-y-8">
-      <div className="card p-8 sm:p-10 relative overflow-hidden">
+      <div className="card p-5 sm:p-10 relative overflow-hidden">
         <div
           className="absolute inset-0 opacity-50"
           style={{
@@ -98,7 +98,7 @@ export default async function EventoPage({
               Passato
             </span>
           )}
-          <h1 className="font-display-tight font-semibold text-4xl sm:text-5xl leading-none tracking-tighter">
+          <h1 className="font-display-tight font-semibold text-2xl sm:text-4xl md:text-5xl leading-none tracking-tighter">
             {ev.title}
           </h1>
 
@@ -140,12 +140,12 @@ export default async function EventoPage({
         </div>
       </div>
 
-      <div className="card p-6 sm:p-8 whitespace-pre-wrap text-ink/80 leading-relaxed">
+      <div className="card p-4 sm:p-8 whitespace-pre-wrap text-ink/80 leading-relaxed">
         {ev.description}
       </div>
 
       {!isPast && (
-        <div className="card p-6 sm:p-8">
+        <div className="card p-4 sm:p-8">
           {isJoined ? (
             <div className="flex items-center gap-4 flex-wrap">
               <span className="text-sm font-semibold text-ink/70">

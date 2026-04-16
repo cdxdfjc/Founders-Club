@@ -46,17 +46,17 @@ export default function HomePage() {
     <div className="min-h-screen flex flex-col">
       {/* NAV */}
       <header className="sticky top-0 z-30">
-        <div className="mx-auto max-w-[1200px] px-5 sm:px-8 pt-5">
-          <div className="glass rounded-full px-4 sm:px-5 py-2.5 flex items-center justify-between gap-4">
+        <div className="mx-auto max-w-[1200px] px-3 sm:px-8 pt-3 sm:pt-5">
+          <div className="glass rounded-full px-3 sm:px-5 py-2 sm:py-2.5 flex items-center justify-between gap-3 sm:gap-4">
             <Logo />
-            <nav className="flex items-center gap-2">
+            <nav className="flex items-center gap-1.5 sm:gap-2">
               <Link
                 href="/login"
                 className="hidden sm:inline-flex px-4 py-2 text-sm font-semibold rounded-full hover:bg-white/60 transition"
               >
                 Accedi
               </Link>
-              <Link href="/signup" className="btn-gradient !py-2.5 !px-5 !text-[14px]">
+              <Link href="/signup" className="btn-gradient !py-2 sm:!py-2.5 !px-4 sm:!px-5 !text-[13px] sm:!text-[14px]">
                 Registrati ✨
               </Link>
             </nav>
@@ -65,26 +65,26 @@ export default function HomePage() {
       </header>
 
       {/* HERO */}
-      <section className="mx-auto max-w-[1200px] px-5 sm:px-8 pt-16 sm:pt-24 pb-20">
-        <div className="grid grid-cols-12 gap-8 items-center">
+      <section className="mx-auto max-w-[1200px] px-4 sm:px-8 pt-10 sm:pt-24 pb-12 sm:pb-20">
+        <div className="grid grid-cols-12 gap-6 sm:gap-8 items-center">
           <div className="col-span-12 lg:col-span-7 rise">
-            <h1 className="font-display-tight font-semibold text-[56px] sm:text-[88px] lg:text-[112px] leading-[0.9] tracking-tighter">
-              <span className="block whitespace-nowrap">La community</span>
-              <span className="block whitespace-nowrap gradient-text">
+            <h1 className="font-display-tight font-semibold text-[36px] sm:text-[88px] lg:text-[112px] leading-[0.9] tracking-tighter">
+              <span className="block">La community</span>
+              <span className="block gradient-text">
                 dei founder.
               </span>
             </h1>
-            <p className="mt-8 text-[19px] sm:text-[21px] leading-relaxed text-ink/70 max-w-xl">
+            <p className="mt-5 sm:mt-8 text-base sm:text-[21px] leading-relaxed text-ink/70 max-w-xl">
               Un posto dove puoi chiedere aiuto, pubblicare la tua idea, trovare
               mentor e incontrare altre persone che vogliono costruire qualcosa
               di buono. Niente guru, niente pose — solo founder veri.
             </p>
-            <div className="mt-10">
+            <div className="mt-7 sm:mt-10">
               <Link href="/login" className="btn-gradient">
                 Entra nella community →
               </Link>
             </div>
-            <div className="mt-10 flex items-center gap-3 text-sm text-ink/60">
+            <div className="mt-7 sm:mt-10 flex items-center gap-3 text-sm text-ink/60">
               <div className="flex -space-x-2">
                 {["bg-sky-aqua", "bg-wisteria", "bg-plum", "bg-petal"].map((c, i) => (
                   <div
@@ -161,24 +161,24 @@ export default function HomePage() {
       </section>
 
       {/* FEATURES */}
-      <section className="mx-auto max-w-[1200px] px-5 sm:px-8 py-20">
-        <div className="text-center mb-14">
+      <section className="mx-auto max-w-[1200px] px-4 sm:px-8 py-12 sm:py-20">
+        <div className="text-center mb-8 sm:mb-14">
           <div className="chip mb-4">✨ Cinque modi per partecipare</div>
-          <h2 className="font-display-tight font-semibold text-[40px] sm:text-[64px] leading-[0.95] tracking-tighter">
+          <h2 className="font-display-tight font-semibold text-[28px] sm:text-[64px] leading-[0.95] tracking-tighter">
             Un'unica community,{" "}
             <span className="gradient-text">tante possibilità.</span>
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5">
           {FEATURES.map((f, i) => (
             <div
               key={f.title}
-              className="card p-7 rise"
+              className="card p-4 sm:p-7 rise"
               style={{ animationDelay: `${0.05 * i}s` }}
             >
               <div
-                className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl mb-5 border"
+                className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center text-xl sm:text-2xl mb-3 sm:mb-5 border"
                 style={{
                   background: `${f.color}30`,
                   borderColor: `${f.color}55`,
@@ -186,19 +186,19 @@ export default function HomePage() {
               >
                 {f.emoji}
               </div>
-              <h3 className="font-display font-semibold text-2xl leading-tight">
+              <h3 className="font-display font-semibold text-base sm:text-2xl leading-tight">
                 {f.title}
               </h3>
-              <p className="mt-2 text-ink/70 leading-relaxed">{f.body}</p>
+              <p className="mt-1.5 sm:mt-2 text-ink/70 text-xs sm:text-base leading-relaxed line-clamp-3">{f.body}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* MANIFESTO */}
-      <section className="mx-auto max-w-[1200px] px-5 sm:px-8 py-20">
+      <section className="mx-auto max-w-[1200px] px-4 sm:px-8 py-12 sm:py-20">
         <div
-          className="relative overflow-hidden rounded-[48px] p-10 sm:p-16 text-center"
+          className="relative overflow-hidden rounded-[24px] sm:rounded-[48px] p-7 sm:p-16 text-center"
           style={{
             background:
               "linear-gradient(135deg, rgba(50,203,255,0.9), rgba(137,161,239,0.9) 50%, rgba(239,156,218,0.9))",
@@ -215,15 +215,15 @@ export default function HomePage() {
 
           <div className="relative">
             <div className="text-4xl mb-6">🦄</div>
-            <h2 className="font-display-tight font-semibold text-white text-[36px] sm:text-[56px] leading-[1] tracking-tighter max-w-3xl mx-auto">
+            <h2 className="font-display-tight font-semibold text-white text-[24px] sm:text-[56px] leading-[1.05] sm:leading-[1] tracking-tighter max-w-3xl mx-auto">
               Non serve un altro social.
               <br />
               Serve un posto dove i founder si aiutano davvero.
             </h2>
-            <div className="mt-10">
+            <div className="mt-7 sm:mt-10">
               <Link
                 href="/signup"
-                className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-white text-ink font-semibold hover:scale-105 transition-transform shadow-xl"
+                className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 rounded-full bg-white text-ink font-semibold text-sm sm:text-base hover:scale-105 transition-transform shadow-xl"
               >
                 Entra gratis →
               </Link>
@@ -233,8 +233,8 @@ export default function HomePage() {
       </section>
 
       {/* FOOTER */}
-      <footer className="mx-auto max-w-[1200px] px-5 sm:px-8 py-10">
-        <div className="glass rounded-3xl px-6 py-5 flex flex-wrap items-center justify-between gap-4 text-sm text-ink/60">
+      <footer className="mx-auto max-w-[1200px] px-4 sm:px-8 py-6 sm:py-10">
+        <div className="glass rounded-2xl sm:rounded-3xl px-4 sm:px-6 py-4 sm:py-5 flex flex-wrap items-center justify-between gap-3 text-xs sm:text-sm text-ink/60">
           <div className="flex items-center gap-2">
             <Logo size="sm" />
           </div>

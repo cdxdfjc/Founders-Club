@@ -38,7 +38,7 @@ export default async function MessaggiPage() {
   return (
     <div className="rise max-w-3xl mx-auto space-y-8">
       <header>
-        <h1 className="font-display-tight font-semibold text-5xl sm:text-6xl leading-none tracking-tighter">
+        <h1 className="font-display-tight font-semibold text-3xl sm:text-5xl md:text-6xl leading-none tracking-tighter">
           La tua <span className="gradient-text">inbox</span>
         </h1>
         <p className="mt-3 text-ink/60">
@@ -78,7 +78,7 @@ export default async function MessaggiPage() {
               const inviterName =
                 inv.inviter?.full_name ?? inv.inviter?.username ?? "qualcuno";
               return (
-                <div key={inv.id} className="card p-6">
+                <div key={inv.id} className="card p-4 sm:p-6">
                   <div className="min-w-0">
                     <p className="text-sm text-ink/60">
                       <strong className="text-ink/80">{inviterName}</strong>{" "}

@@ -40,9 +40,9 @@ export default async function ImpostazioniPage() {
   return (
     <div className="max-w-3xl mx-auto rise space-y-8">
       {/* HEADER */}
-      <header className="flex items-center gap-5">
+      <header className="flex items-center gap-4 sm:gap-5">
         <div
-          className="w-20 h-20 rounded-3xl flex items-center justify-center text-white text-4xl font-display font-semibold shrink-0 shadow-lg"
+          className="w-14 h-14 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl flex items-center justify-center text-white text-2xl sm:text-4xl font-display font-semibold shrink-0 shadow-lg"
           style={{
             background:
               "linear-gradient(135deg, #32CBFF, #89A1EF 50%, #EF9CDA)",
@@ -51,7 +51,7 @@ export default async function ImpostazioniPage() {
           {initial}
         </div>
         <div className="min-w-0">
-          <h1 className="font-display-tight font-semibold text-4xl sm:text-5xl leading-none tracking-tighter">
+          <h1 className="font-display-tight font-semibold text-2xl sm:text-4xl md:text-5xl leading-none tracking-tighter">
             Impostazioni
           </h1>
           <p className="mt-2 text-ink/60 text-sm">

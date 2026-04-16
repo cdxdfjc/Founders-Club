@@ -67,7 +67,7 @@ export default async function ProgettiPage({
       {/* HEADER */}
       <header className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
-          <h1 className="font-display-tight font-semibold text-5xl sm:text-6xl leading-none tracking-tighter">
+          <h1 className="font-display-tight font-semibold text-3xl sm:text-5xl md:text-6xl leading-none tracking-tighter">
             Idee & <span className="gradient-text">progetti</span>
           </h1>
           <p className="mt-3 text-ink/60 max-w-xl">
@@ -267,7 +267,7 @@ function ProjectCard({ p }: { p: ProjectCardData }) {
   const initial = ownerName.charAt(0).toUpperCase();
 
   return (
-    <Link href={`/progetti/${p.id}`} className="card p-6 flex flex-col group">
+    <Link href={`/progetti/${p.id}`} className="card p-4 sm:p-6 flex flex-col group">
       {/* Top row: category + stage */}
       <div className="flex items-center justify-between gap-2 mb-4">
         {p.category ? (

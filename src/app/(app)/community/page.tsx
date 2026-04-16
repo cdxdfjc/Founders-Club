@@ -74,7 +74,7 @@ export default async function CommunityPage({
   return (
     <div className="rise space-y-8">
       <header>
-        <h1 className="font-display-tight font-semibold text-5xl sm:text-6xl leading-none tracking-tighter">
+        <h1 className="font-display-tight font-semibold text-3xl sm:text-5xl md:text-6xl leading-none tracking-tighter">
           La <span className="gradient-text">community</span>
         </h1>
         <p className="mt-3 text-ink/60 max-w-xl">
@@ -138,19 +138,19 @@ function MemberCard({
   return (
     <Link
       href={`/profilo/${profile.username}`}
-      className="card p-6 flex flex-col group hover:shadow-md transition"
+      className="card p-4 sm:p-6 flex flex-col group hover:shadow-md transition"
     >
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3 sm:gap-4">
         {profile.avatar_url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={profile.avatar_url}
             alt=""
-            className="w-14 h-14 rounded-full object-cover shrink-0"
+            className="w-11 h-11 sm:w-14 sm:h-14 rounded-full object-cover shrink-0"
           />
         ) : (
           <span
-            className="w-14 h-14 rounded-full flex items-center justify-center text-white text-lg font-bold shrink-0"
+            className="w-11 h-11 sm:w-14 sm:h-14 rounded-full flex items-center justify-center text-white text-base sm:text-lg font-bold shrink-0"
             style={{
               background: "linear-gradient(135deg, #32CBFF, #89A1EF, #EF9CDA)",
             }}

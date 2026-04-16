@@ -91,7 +91,7 @@ export default async function ThreadPage({
         ← Torna al bar
       </Link>
 
-      <article className="card p-7 sm:p-8">
+      <article className="card p-5 sm:p-8">
         <div className="flex items-center justify-between gap-3 mb-5">
           <div className="flex items-center gap-3 min-w-0">
             <span

@@ -72,7 +72,7 @@ export default async function AiutoPage({
           >
             🙋 Aiuto
           </span>
-          <h1 className="font-display-tight font-semibold text-5xl sm:text-6xl leading-none tracking-tighter">
+          <h1 className="font-display-tight font-semibold text-3xl sm:text-5xl md:text-6xl leading-none tracking-tighter">
             Chiedi una <span className="gradient-text">mano</span>
           </h1>
           <p className="mt-3 text-ink/60 max-w-xl">
@@ -151,7 +151,7 @@ function HelpCard({ r }: { r: Row }) {
         style={{ background: HELP_GRADIENT }}
       />
 
-      <div className="p-6 flex flex-col flex-1">
+      <div className="p-4 sm:p-6 flex flex-col flex-1">
         {/* Top row: categoria + urgenza/stato */}
         <div className="flex items-center justify-between gap-2 mb-3">
           <span
