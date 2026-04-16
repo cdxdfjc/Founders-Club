@@ -1,10 +1,15 @@
 -- Founders Club — Sezione Meetup/Eventi
 -- Eventi creati dai founder + partecipazioni
 
+-- NOTA: 0001_init.sql aveva una vecchia tabella "events" con schema diverso
+-- (host_id, niente max_participants). La droppiamo per ricrearla.
+drop table if exists public.event_attendees cascade;
+drop table if exists public.events cascade;
+
 -- ============================================================
 -- EVENTS
 -- ============================================================
-create table if not exists public.events (
+create table public.events (
   id uuid primary key default gen_random_uuid(),
   organizer_id uuid not null references public.profiles(id) on delete cascade,
   title text not null check (char_length(title) between 4 and 120),
