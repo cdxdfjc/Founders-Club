@@ -38,7 +38,7 @@ export default async function MessaggiPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { data: invites } = await supabase
+  const { data: invites, error: invitesError } = await supabase
     .from("project_invites")
     .select(
       `
@@ -51,9 +51,11 @@ export default async function MessaggiPage() {
     .eq("status", "pending")
     .order("created_at", { ascending: false });
 
+  if (invitesError) console.error("project_invites query error:", invitesError);
+
   const list = (invites as unknown as InviteRow[] | null) ?? [];
 
-  const { data: portfolioInvites } = await supabase
+  const { data: portfolioInvites, error: portfolioError } = await supabase
     .from("user_project_invites")
     .select(
       `
@@ -65,6 +67,8 @@ export default async function MessaggiPage() {
     .eq("invitee_id", user.id)
     .eq("status", "pending")
     .order("created_at", { ascending: false });
+
+  if (portfolioError) console.error("user_project_invites query error:", portfolioError);
 
   const portfolioList =
     (portfolioInvites as unknown as PortfolioInviteRow[] | null) ?? [];
