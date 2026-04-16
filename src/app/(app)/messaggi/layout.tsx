@@ -83,13 +83,6 @@ export default async function MessaggiLayout({
   return (
     <div className="rise max-w-5xl mx-auto">
       <header className="mb-6">
-        <Link
-          href="/feed"
-          className="inline-flex items-center gap-1.5 text-sm font-semibold text-ink/60 hover:text-ink transition mb-4"
-        >
-          <span className="text-base leading-none">←</span>
-          Torna alla home
-        </Link>
         <h1 className="font-display-tight font-semibold text-3xl sm:text-5xl md:text-6xl leading-none tracking-tighter">
           <span className="gradient-text">Messaggi</span>
         </h1>
