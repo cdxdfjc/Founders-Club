@@ -2,8 +2,7 @@ import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getOrCreateConversation } from "@/lib/actions/chat";
-import { ChatMessages } from "@/components/ChatMessages";
-import { ChatInput } from "@/components/ChatInput";
+import { ChatView } from "@/components/ChatMessages";
 
 export default async function ConversationPage({
   params,
@@ -42,7 +41,10 @@ export default async function ConversationPage({
     .toUpperCase();
 
   return (
-    <div className="card flex flex-col" style={{ height: "70vh" }}>
+    <div
+      className="card card-static flex flex-col"
+      style={{ height: "70vh" }}
+    >
       {/* Header conversazione */}
       <div className="flex items-center gap-3 p-4 border-b border-ink/8">
         <Link
@@ -82,17 +84,11 @@ export default async function ConversationPage({
         </div>
       </div>
 
-      {/* Messaggi */}
-      <ChatMessages
+      <ChatView
         conversationId={conversationId}
         currentUserId={user.id}
-        initialMessages={messages ?? []}
-      />
-
-      {/* Input */}
-      <ChatInput
-        conversationId={conversationId}
         recipientId={otherProfile.id}
+        initialMessages={messages ?? []}
       />
     </div>
   );

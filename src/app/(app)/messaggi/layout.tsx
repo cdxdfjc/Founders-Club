@@ -79,7 +79,7 @@ export default async function MessaggiLayout({
       <div className="flex gap-5" style={{ minHeight: "70vh" }}>
         {/* Sidebar */}
         <aside className="hidden sm:block w-72 lg:w-80 shrink-0">
-          <div className="card p-3 sticky top-24">
+          <div className="card card-static p-3 sticky top-24">
             <Link
               href="/messaggi/nuovo"
               className="btn-gradient !py-2.5 !px-4 !text-sm w-full mb-3"

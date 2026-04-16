@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
@@ -75,8 +74,6 @@ export async function sendMessage(formData: FormData) {
     .from("conversations")
     .update({ last_message_at: new Date().toISOString() })
     .eq("id", conversationId);
-
-  revalidatePath("/messaggi");
 }
 
 /** Segna tutti i messaggi di una conversazione come letti */

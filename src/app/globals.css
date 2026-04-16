@@ -168,6 +168,11 @@ section {
   box-shadow: var(--shadow-float);
   border-color: rgba(137, 161, 239, 0.4);
 }
+.card-static:hover {
+  transform: none;
+  box-shadow: var(--shadow-soft);
+  border-color: rgba(255, 255, 255, 0.8);
+}
 
 .btn-primary {
   display: inline-flex;
