@@ -72,55 +72,66 @@ export default async function MessaggiPage() {
   const hasInvites = list.length > 0 || portfolioList.length > 0;
 
   // Conversazioni per mobile view
-  const { data: rawConvos } = await supabase
-    .from("conversations")
-    .select("id, user_a, user_b, last_message_at")
-    .or(`user_a.eq.${user.id},user_b.eq.${user.id}`)
-    .order("last_message_at", { ascending: false });
+  let mobileConversations: {
+    id: string;
+    other_username: string;
+    other_full_name: string | null;
+    last_message_body: string | null;
+    last_message_at: string;
+    unread_count: number;
+  }[] = [];
 
-  const mobileConversations = await Promise.all(
-    (
-      rawConvos ?? []
-    ).map(
-      async (c: {
-        id: string;
-        user_a: string;
-        user_b: string;
-        last_message_at: string;
-      }) => {
-        const otherId = c.user_a === user.id ? c.user_b : c.user_a;
-        const [{ data: profile }, { data: lastMsg }, { count: unreadCount }] =
-          await Promise.all([
-            supabase
-              .from("profiles")
-              .select("username, full_name")
-              .eq("id", otherId)
-              .maybeSingle(),
-            supabase
-              .from("messages")
-              .select("body")
-              .eq("conversation_id", c.id)
-              .order("created_at", { ascending: false })
-              .limit(1)
-              .maybeSingle(),
-            supabase
-              .from("messages")
-              .select("id", { count: "exact", head: true })
-              .eq("conversation_id", c.id)
-              .eq("recipient_id", user.id)
-              .is("read_at", null),
-          ]);
-        return {
-          id: c.id,
-          other_username: profile?.username ?? "utente",
-          other_full_name: profile?.full_name ?? null,
-          last_message_body: lastMsg?.body ?? null,
-          last_message_at: c.last_message_at,
-          unread_count: unreadCount ?? 0,
-        };
-      },
-    ),
-  );
+  try {
+    const { data: rawConvos } = await supabase
+      .from("conversations")
+      .select("id, user_a, user_b, last_message_at")
+      .or(`user_a.eq.${user.id},user_b.eq.${user.id}`)
+      .order("last_message_at", { ascending: false });
+
+    mobileConversations = await Promise.all(
+      (rawConvos ?? []).map(
+        async (c: {
+          id: string;
+          user_a: string;
+          user_b: string;
+          last_message_at: string;
+        }) => {
+          const otherId = c.user_a === user.id ? c.user_b : c.user_a;
+          const [{ data: profile }, { data: lastMsg }, { count: unreadCount }] =
+            await Promise.all([
+              supabase
+                .from("profiles")
+                .select("username, full_name")
+                .eq("id", otherId)
+                .maybeSingle(),
+              supabase
+                .from("messages")
+                .select("body")
+                .eq("conversation_id", c.id)
+                .order("created_at", { ascending: false })
+                .limit(1)
+                .maybeSingle(),
+              supabase
+                .from("messages")
+                .select("id", { count: "exact", head: true })
+                .eq("conversation_id", c.id)
+                .eq("recipient_id", user.id)
+                .is("read_at", null),
+            ]);
+          return {
+            id: c.id,
+            other_username: profile?.username ?? "utente",
+            other_full_name: profile?.full_name ?? null,
+            last_message_body: lastMsg?.body ?? null,
+            last_message_at: c.last_message_at ?? new Date().toISOString(),
+            unread_count: unreadCount ?? 0,
+          };
+        },
+      ),
+    );
+  } catch {
+    // Query fallita — mostra pagina senza conversazioni mobile
+  }
 
   return (
     <div className="space-y-6">

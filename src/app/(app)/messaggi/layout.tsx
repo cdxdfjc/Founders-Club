@@ -22,51 +22,63 @@ export default async function MessaggiLayout({
   if (!user) redirect("/login");
 
   // Fetch tutte le conversazioni dell'utente
-  const { data: rawConversations } = await supabase
-    .from("conversations")
-    .select("id, user_a, user_b, last_message_at")
-    .or(`user_a.eq.${user.id},user_b.eq.${user.id}`)
-    .order("last_message_at", { ascending: false });
+  let conversations: {
+    id: string;
+    other_username: string;
+    other_full_name: string | null;
+    last_message_body: string | null;
+    last_message_at: string;
+    unread_count: number;
+  }[] = [];
 
-  const convos = (rawConversations ?? []) as ConversationRow[];
+  try {
+    const { data: rawConversations } = await supabase
+      .from("conversations")
+      .select("id, user_a, user_b, last_message_at")
+      .or(`user_a.eq.${user.id},user_b.eq.${user.id}`)
+      .order("last_message_at", { ascending: false });
 
-  // Fetch profili degli altri utenti e ultimo messaggio + unread count
-  const conversations = await Promise.all(
-    convos.map(async (c) => {
-      const otherId = c.user_a === user.id ? c.user_b : c.user_a;
+    const convos = (rawConversations ?? []) as ConversationRow[];
 
-      const [{ data: profile }, { data: lastMsg }, { count: unreadCount }] =
-        await Promise.all([
-          supabase
-            .from("profiles")
-            .select("username, full_name")
-            .eq("id", otherId)
-            .maybeSingle(),
-          supabase
-            .from("messages")
-            .select("body")
-            .eq("conversation_id", c.id)
-            .order("created_at", { ascending: false })
-            .limit(1)
-            .maybeSingle(),
-          supabase
-            .from("messages")
-            .select("id", { count: "exact", head: true })
-            .eq("conversation_id", c.id)
-            .eq("recipient_id", user.id)
-            .is("read_at", null),
-        ]);
+    conversations = await Promise.all(
+      convos.map(async (c) => {
+        const otherId = c.user_a === user.id ? c.user_b : c.user_a;
 
-      return {
-        id: c.id,
-        other_username: profile?.username ?? "utente",
-        other_full_name: profile?.full_name ?? null,
-        last_message_body: lastMsg?.body ?? null,
-        last_message_at: c.last_message_at,
-        unread_count: unreadCount ?? 0,
-      };
-    }),
-  );
+        const [{ data: profile }, { data: lastMsg }, { count: unreadCount }] =
+          await Promise.all([
+            supabase
+              .from("profiles")
+              .select("username, full_name")
+              .eq("id", otherId)
+              .maybeSingle(),
+            supabase
+              .from("messages")
+              .select("body")
+              .eq("conversation_id", c.id)
+              .order("created_at", { ascending: false })
+              .limit(1)
+              .maybeSingle(),
+            supabase
+              .from("messages")
+              .select("id", { count: "exact", head: true })
+              .eq("conversation_id", c.id)
+              .eq("recipient_id", user.id)
+              .is("read_at", null),
+          ]);
+
+        return {
+          id: c.id,
+          other_username: profile?.username ?? "utente",
+          other_full_name: profile?.full_name ?? null,
+          last_message_body: lastMsg?.body ?? null,
+          last_message_at: c.last_message_at ?? new Date().toISOString(),
+          unread_count: unreadCount ?? 0,
+        };
+      }),
+    );
+  } catch {
+    // Query fallita — mostra pagina con lista vuota
+  }
 
   return (
     <div className="rise max-w-5xl mx-auto">
