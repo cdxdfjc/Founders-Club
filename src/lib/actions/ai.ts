@@ -6,6 +6,68 @@ import { openaiJSON } from "@/lib/ai/openai";
 import { STAGES } from "@/lib/projects";
 import { HELP_CATEGORIES, HELP_URGENCIES } from "@/lib/help";
 
+export async function improveText(
+  text: string,
+  context: string,
+): Promise<{ ok: true; improved: string } | { ok: false; error: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const trimmed = (text ?? "").trim();
+  if (trimmed.length < 10) {
+    return {
+      ok: false,
+      error: "Scrivi almeno 10 caratteri prima di chiedere all'AI.",
+    };
+  }
+  if (trimmed.length > 4000) {
+    return { ok: false, error: "Testo troppo lungo. Massimo 4000 caratteri." };
+  }
+
+  const system = `Sei un editor che aiuta founder italiani a migliorare i testi per la community Founders Club.
+
+L'utente ti dà un testo e il contesto di dove verrà usato. Tu lo riscrivi migliorandolo: più chiaro, più scorrevole, più concreto.
+
+Regole:
+- Rispondi SEMPRE in italiano
+- Tono caldo, diretto, da founder. Mai gergo aziendale o marketing-bullshit
+- Non inventare fatti, numeri o dettagli non presenti nel testo originale
+- Mantieni la stessa lunghezza (± 20%). Non allungare inutilmente
+- Preserva il significato e la personalità dell'autore
+- Restituisci SOLO il testo migliorato, nient'altro`;
+
+  const userPrompt = `Contesto: ${context}\n\nTesto da migliorare:\n"""\n${trimmed}\n"""`;
+
+  const schema = {
+    type: "object" as const,
+    additionalProperties: false,
+    properties: {
+      improved: { type: "string" },
+    },
+    required: ["improved"],
+  };
+
+  try {
+    const result = await openaiJSON<{ improved: string }>({
+      system,
+      user: userPrompt,
+      schema,
+      schemaName: "improved_text",
+    });
+    return { ok: true, improved: result.improved };
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "Errore sconosciuto";
+    console.error("[improveText]", msg);
+    return {
+      ok: false,
+      error: "L'assistente AI non ha risposto. Riprova tra un attimo.",
+    };
+  }
+}
+
 export type UserProjectDraft = {
   name: string;
   description: string;

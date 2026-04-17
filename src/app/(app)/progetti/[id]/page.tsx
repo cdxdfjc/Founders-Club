@@ -10,6 +10,7 @@ import {
 import { stageMeta } from "@/lib/projects";
 import { DeleteButton } from "@/components/DeleteButton";
 import { SubmitButton } from "@/components/SubmitButton";
+import { AiTextarea } from "@/components/AiTextarea";
 import { InviteTeamBox } from "@/components/InviteTeamBox";
 import { cancelInvite } from "@/lib/actions/invites";
 
@@ -289,12 +290,13 @@ export default async function ProgettoDettaglioPage({
                 Spiega in due righe perché vorresti contribuire e cosa puoi
                 portare.
               </p>
-              <textarea
+              <AiTextarea
                 name="message"
                 rows={3}
                 className="field resize-y min-h-[80px]"
                 placeholder="Sono uno sviluppatore React, mi piace molto l'idea perché…"
                 maxLength={500}
+                context="Richiesta di partecipazione a un progetto su Founders Club"
               />
               <SubmitButton
                 className="btn-gradient !py-2.5 !px-5 !text-sm"
@@ -372,13 +374,14 @@ export default async function ProgettoDettaglioPage({
 
         <form action={addComment} className="space-y-3 mb-6">
           <input type="hidden" name="project_id" value={project.id} />
-          <textarea
+          <AiTextarea
             name="body"
             rows={3}
             className="field resize-y min-h-[80px]"
             placeholder="Scrivi un commento…"
             required
             maxLength={1000}
+            context="Commento sotto un progetto su Founders Club"
           />
           <div>
             <SubmitButton

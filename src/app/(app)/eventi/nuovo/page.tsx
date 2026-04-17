@@ -1,5 +1,6 @@
 import { createEvent } from "@/lib/actions/events";
 import { SubmitButton } from "@/components/SubmitButton";
+import { AiTextarea } from "@/components/AiTextarea";
 
 export default function NuovoEventoPage() {
   return (
@@ -35,15 +36,15 @@ export default function NuovoEventoPage() {
           <label htmlFor="description" className="label">
             Descrizione
           </label>
-          <textarea
-            id="description"
+          <AiTextarea
             name="description"
             required
             minLength={10}
             maxLength={4000}
             rows={4}
             placeholder="Cosa si farà, a chi è rivolto, tono dell'evento…"
-            className="field"
+            className="field resize-y min-h-[100px]"
+            context="Descrizione di un meetup/evento per founder su Founders Club"
           />
         </div>
 

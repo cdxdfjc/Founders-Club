@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { addBarReply, deleteBarThread } from "@/lib/actions/bar";
 import { DeleteButton } from "@/components/DeleteButton";
 import { SubmitButton } from "@/components/SubmitButton";
+import { AiTextarea } from "@/components/AiTextarea";
 
 function timeAgo(iso: string): string {
   const s = Math.max(1, Math.floor((Date.now() - new Date(iso).getTime()) / 1000));
@@ -172,13 +173,14 @@ export default async function ThreadPage({
           <span className="text-sm font-semibold text-ink/80 mb-1.5 block">
             La tua risposta
           </span>
-          <textarea
+          <AiTextarea
             name="body"
             rows={4}
             className="field resize-y min-h-[100px]"
             placeholder="Dì la tua…"
             required
             maxLength={2000}
+            context="Risposta in un thread del Bar di Founders Club"
           />
         </label>
         <div className="mt-4 flex justify-end">

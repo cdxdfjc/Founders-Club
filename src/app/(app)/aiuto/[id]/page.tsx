@@ -6,6 +6,7 @@ import {
   deleteHelpRequest,
   toggleHelpSolved,
 } from "@/lib/actions/help";
+import { AiTextarea } from "@/components/AiTextarea";
 import { DeleteButton } from "@/components/DeleteButton";
 import { SubmitButton } from "@/components/SubmitButton";
 import {
@@ -257,13 +258,14 @@ export default async function HelpRequestPage({
             <span className="text-sm font-semibold text-ink/80 mb-1.5 block">
               La tua risposta
             </span>
-            <textarea
+            <AiTextarea
               name="body"
               rows={4}
               className="field resize-y min-h-[100px]"
-              placeholder="Dì la tua, condividi un link, una dritta, un&apos;esperienza…"
+              placeholder="Dì la tua, condividi un link, una dritta, un'esperienza…"
               required
               maxLength={2000}
+              context="Risposta a una richiesta d'aiuto su Founders Club"
             />
           </label>
           <div className="mt-4 flex justify-end">

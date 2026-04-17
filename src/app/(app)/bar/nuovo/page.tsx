@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createBarThread } from "@/lib/actions/bar";
 import { SubmitButton } from "@/components/SubmitButton";
+import { AiTextarea } from "@/components/AiTextarea";
 
 export default async function NuovoThreadPage() {
   const supabase = await createClient();
@@ -48,13 +49,14 @@ export default async function NuovoThreadPage() {
           <span className="text-sm font-semibold text-ink/80 mb-1.5 block">
             Messaggio
           </span>
-          <textarea
+          <AiTextarea
             name="body"
             rows={8}
             className="field resize-y min-h-[180px]"
             placeholder="Racconta, chiedi, sfogati…"
             required
             maxLength={4000}
+            context="Post nel Bar di Founders Club — spazio libero dove founder chiacchierano, chiedono e condividono"
           />
         </label>
 

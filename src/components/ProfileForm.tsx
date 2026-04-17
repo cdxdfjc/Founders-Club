@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { updateProfile } from "@/lib/actions/profile";
+import { AiTextarea } from "@/components/AiTextarea";
 
 type Props = {
   username: string;
@@ -98,12 +99,12 @@ export function ProfileForm({ username, initial }: Props) {
       </div>
 
       <Row label="Bio" hint="Cosa fai, cosa stai costruendo, cosa cerchi.">
-        <textarea
+        <AiTextarea
           name="bio"
           rows={5}
-          className="field resize-y min-h-[120px]"
           value={values.bio}
-          onChange={set("bio")}
+          onChange={(v) => setValues((prev) => ({ ...prev, bio: v }))}
+          context="Bio del profilo personale di un founder su Founders Club"
           placeholder="Founder di una micro-SaaS, vengo dal mondo design, sto cercando un co-founder tecnico…"
           maxLength={500}
         />
