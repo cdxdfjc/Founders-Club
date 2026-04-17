@@ -25,7 +25,7 @@ export default async function ProgettiPage({
     .from("projects")
     .select(
       `
-      id, title, tagline, description, tags, stage, created_at,
+      id, title, tagline, description, tags, stage, image_url, created_at,
       owner:profiles!projects_owner_id_fkey ( username, full_name ),
       category:project_categories ( id, slug, name, emoji ),
       project_likes ( user_id ),
@@ -85,32 +85,32 @@ export default async function ProgettiPage({
 
       {/* SEARCH + FILTRI */}
       <div className="card p-4 sm:p-5">
-        <div className="flex items-center gap-2 sm:gap-3">
-          <form
-            method="GET"
-            action="/progetti"
-            className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0"
-          >
-            {cat && <input type="hidden" name="cat" value={cat} />}
-            {stage && <input type="hidden" name="stage" value={stage} />}
-            <span className="text-xl shrink-0">🔍</span>
-            <input
-              type="text"
-              name="q"
-              defaultValue={q ?? ""}
-              placeholder="Cerca progetti…"
-              className="field !py-3 min-w-0"
-            />
-            <button
-              type="submit"
-              className="btn-gradient !py-3 !px-4 !text-sm whitespace-nowrap shrink-0"
+        <details className="group">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <form
+              method="GET"
+              action="/progetti"
+              className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0"
             >
-              Cerca
-            </button>
-          </form>
+              {cat && <input type="hidden" name="cat" value={cat} />}
+              {stage && <input type="hidden" name="stage" value={stage} />}
+              <span className="text-xl shrink-0">🔍</span>
+              <input
+                type="text"
+                name="q"
+                defaultValue={q ?? ""}
+                placeholder="Cerca progetti…"
+                className="field !py-3 min-w-0"
+              />
+              <button
+                type="submit"
+                className="btn-gradient !py-3 !px-4 !text-sm whitespace-nowrap shrink-0"
+              >
+                Cerca
+              </button>
+            </form>
 
-          <details className="relative group shrink-0">
-            <summary className="list-none cursor-pointer select-none flex items-center gap-2 px-4 py-3 rounded-full border border-ink/10 bg-white/70 hover:bg-white transition text-sm font-semibold">
+            <summary className="list-none cursor-pointer select-none flex items-center gap-2 px-4 py-3 rounded-full border border-ink/10 bg-white/70 hover:bg-white transition text-sm font-semibold shrink-0">
               <span>⚙️</span>
               <span className="hidden sm:inline">Filtri</span>
               {activeFilterCount > 0 && (
@@ -128,70 +128,70 @@ export default async function ProgettiPage({
                 ▾
               </span>
             </summary>
+          </div>
 
-            <div className="absolute right-0 top-full mt-2 w-[min(90vw,520px)] card p-5 z-20 shadow-xl">
-              {activeFilterCount > 0 && (
-                <div className="flex items-center justify-between mb-4 pb-3 border-b border-ink/5">
-                  <span className="text-xs text-ink/60 truncate">
-                    {activeFilterSummary}
-                  </span>
-                  <Link
-                    href={
-                      q ? `/progetti?q=${encodeURIComponent(q)}` : "/progetti"
-                    }
-                    className="text-xs font-semibold text-plum hover:underline whitespace-nowrap ml-3"
-                  >
-                    Reset filtri
-                  </Link>
-                </div>
-              )}
+          <div className="mt-4 pt-4 border-t border-ink/5">
+            {activeFilterCount > 0 && (
+              <div className="flex items-center justify-between mb-4 pb-3 border-b border-ink/5">
+                <span className="text-xs text-ink/60 truncate">
+                  {activeFilterSummary}
+                </span>
+                <Link
+                  href={
+                    q ? `/progetti?q=${encodeURIComponent(q)}` : "/progetti"
+                  }
+                  className="text-xs font-semibold text-plum hover:underline whitespace-nowrap ml-3"
+                >
+                  Reset filtri
+                </Link>
+              </div>
+            )}
 
-              <div className="space-y-5">
-                <div>
-                  <p className="text-xs font-semibold text-ink/50 uppercase tracking-wider mb-2">
-                    Categoria
-                  </p>
-                  <div className="flex flex-wrap gap-2">
+            <div className="space-y-5">
+              <div>
+                <p className="text-xs font-semibold text-ink/50 uppercase tracking-wider mb-2">
+                  Categoria
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <FilterChip
+                    href={buildHref({ q, cat: undefined, stage })}
+                    active={!cat}
+                    label="Tutte"
+                  />
+                  {categories?.map((c) => (
                     <FilterChip
-                      href={buildHref({ q, cat: undefined, stage })}
-                      active={!cat}
-                      label="Tutte"
+                      key={c.slug}
+                      href={buildHref({ q, cat: c.slug, stage })}
+                      active={cat === c.slug}
+                      label={`${c.emoji ?? "•"} ${c.name}`}
                     />
-                    {categories?.map((c) => (
-                      <FilterChip
-                        key={c.slug}
-                        href={buildHref({ q, cat: c.slug, stage })}
-                        active={cat === c.slug}
-                        label={`${c.emoji ?? "•"} ${c.name}`}
-                      />
-                    ))}
-                  </div>
+                  ))}
                 </div>
+              </div>
 
-                <div>
-                  <p className="text-xs font-semibold text-ink/50 uppercase tracking-wider mb-2">
-                    Stage
-                  </p>
-                  <div className="flex flex-wrap gap-2">
+              <div>
+                <p className="text-xs font-semibold text-ink/50 uppercase tracking-wider mb-2">
+                  Stage
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <FilterChip
+                    href={buildHref({ q, cat, stage: undefined })}
+                    active={!stage}
+                    label="Tutti"
+                  />
+                  {STAGES.map((s) => (
                     <FilterChip
-                      href={buildHref({ q, cat, stage: undefined })}
-                      active={!stage}
-                      label="Tutti"
+                      key={s.value}
+                      href={buildHref({ q, cat, stage: s.value })}
+                      active={stage === s.value}
+                      label={`${s.emoji} ${s.label}`}
                     />
-                    {STAGES.map((s) => (
-                      <FilterChip
-                        key={s.value}
-                        href={buildHref({ q, cat, stage: s.value })}
-                        active={stage === s.value}
-                        label={`${s.emoji} ${s.label}`}
-                      />
-                    ))}
-                  </div>
+                  ))}
                 </div>
               </div>
             </div>
-          </details>
-        </div>
+          </div>
+        </details>
       </div>
 
       {/* GRID */}
@@ -254,6 +254,7 @@ type ProjectCardData = {
   description: string;
   tags: string[];
   stage: string | null;
+  image_url: string | null;
   owner: { username: string; full_name: string | null } | null;
   category: { slug: string; name: string; emoji: string | null } | null;
   project_likes: { user_id: string }[];
@@ -267,7 +268,19 @@ function ProjectCard({ p }: { p: ProjectCardData }) {
   const initial = ownerName.charAt(0).toUpperCase();
 
   return (
-    <Link href={`/progetti/${p.id}`} className="card p-4 sm:p-6 flex flex-col group">
+    <Link href={`/progetti/${p.id}`} className="card overflow-hidden flex flex-col group">
+      {p.image_url && (
+        <div className="w-full aspect-[2/1] bg-ink/5 overflow-hidden">
+          <img
+            src={p.image_url}
+            alt={p.title}
+            className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
+            loading="lazy"
+          />
+        </div>
+      )}
+
+      <div className={`flex-1 flex flex-col ${p.image_url ? "p-4 sm:p-5" : "p-4 sm:p-6"}`}>
       {/* Top row: category + stage */}
       <div className="flex items-center justify-between gap-2 mb-4">
         {p.category ? (
@@ -335,6 +348,7 @@ function ProjectCard({ p }: { p: ProjectCardData }) {
           <span title="Commenti">💬 {p.project_comments?.length ?? 0}</span>
           <span title="Membri">👥 {(p.project_members?.length ?? 0) + 1}</span>
         </div>
+      </div>
       </div>
     </Link>
   );

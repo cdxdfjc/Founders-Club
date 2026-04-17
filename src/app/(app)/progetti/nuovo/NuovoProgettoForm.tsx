@@ -7,6 +7,7 @@ import { assistProjectDraft } from "@/lib/actions/ai";
 import { STAGES } from "@/lib/projects";
 import { SubmitButton } from "@/components/SubmitButton";
 import { TeamPicker } from "@/components/TeamPicker";
+import { ImageUpload } from "@/components/ImageUpload";
 
 type Category = { slug: string; name: string; emoji: string | null };
 type Candidate = { id: string; username: string; full_name: string | null };
@@ -32,6 +33,7 @@ export function NuovoProgettoForm({
   const [tags, setTags] = useState("");
   const [url, setUrl] = useState("");
   const [team, setTeam] = useState<Candidate[]>([]);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
 
   function runAssist() {
     setAiError(null);
@@ -121,6 +123,17 @@ export function NuovoProgettoForm({
 
       {/* FORM PRINCIPALE */}
       <form action={createProject} className="card p-7 sm:p-9 space-y-5">
+        <div>
+          <span className="text-sm font-semibold text-ink/80 mb-1.5 block">
+            Immagine o logo
+          </span>
+          <ImageUpload value={imageUrl} onChange={setImageUrl} />
+          {imageUrl && <input type="hidden" name="image_url" value={imageUrl} />}
+          <p className="text-xs text-ink/50 mt-1.5">
+            Opzionale. Un&apos;immagine rende il progetto più attraente.
+          </p>
+        </div>
+
         <Field label="Titolo" hint="Un nome corto e memorabile.">
           <input
             name="title"

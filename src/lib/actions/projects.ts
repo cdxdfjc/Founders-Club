@@ -84,6 +84,7 @@ export async function createProject(formData: FormData): Promise<void> {
       url: str(formData.get("url")),
       category_id: categoryId,
       stage: stage || null,
+      image_url: str(formData.get("image_url")),
     })
     .select("id")
     .single();

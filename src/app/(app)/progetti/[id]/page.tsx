@@ -31,7 +31,7 @@ export default async function ProgettoDettaglioPage({
     .from("projects")
     .select(
       `
-      id, title, tagline, description, tags, stage, url, owner_id, created_at,
+      id, title, tagline, description, tags, stage, url, image_url, owner_id, created_at,
       owner:profiles!projects_owner_id_fkey ( id, username, full_name ),
       category:project_categories ( slug, name, emoji )
       `,
@@ -133,14 +133,27 @@ export default async function ProgettoDettaglioPage({
       </Link>
 
       {/* HERO */}
-      <header className="card p-5 sm:p-10 relative overflow-hidden">
-        <div
-          className="absolute inset-0 opacity-60 pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(ellipse at 0% 0%, rgba(50,203,255,0.25), transparent 55%), radial-gradient(ellipse at 100% 100%, rgba(239,156,218,0.25), transparent 55%)",
-          }}
-        />
+      <header className="card overflow-hidden">
+        {project.image_url && (
+          <div className="w-full aspect-[2.5/1] bg-ink/5 overflow-hidden">
+            <img
+              src={project.image_url as string}
+              alt={project.title}
+              className="w-full h-full object-cover"
+            />
+          </div>
+        )}
+
+        <div className={`p-5 sm:p-10 relative ${project.image_url ? "" : "overflow-hidden"}`}>
+        {!project.image_url && (
+          <div
+            className="absolute inset-0 opacity-60 pointer-events-none"
+            style={{
+              background:
+                "radial-gradient(ellipse at 0% 0%, rgba(50,203,255,0.25), transparent 55%), radial-gradient(ellipse at 100% 100%, rgba(239,156,218,0.25), transparent 55%)",
+            }}
+          />
+        )}
 
         <div className="relative">
           <div className="flex flex-wrap items-center gap-2 mb-5">
@@ -238,6 +251,7 @@ export default async function ProgettoDettaglioPage({
             <span>·</span>
             <span>💬 {comments?.length ?? 0} commenti</span>
           </div>
+        </div>
         </div>
       </header>
 
