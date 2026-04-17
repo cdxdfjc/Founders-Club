@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -37,22 +37,21 @@ export function ConversationList({
   initialConversations: Conversation[];
   currentUserId: string;
 }) {
+  const instanceId = useId();
   const [conversations, setConversations] =
     useState<Conversation[]>(initialConversations);
   const pathname = usePathname();
   const router = useRouter();
 
-  // Update list when initialConversations change (server re-render)
   useEffect(() => {
     setConversations(initialConversations);
   }, [initialConversations]);
 
-  // Listen for new messages to update the sidebar
   useEffect(() => {
     const supabase = createClient();
 
     const channel = supabase
-      .channel("conversation-updates")
+      .channel(`conversation-updates-${instanceId}`)
       .on(
         "postgres_changes",
         {
@@ -61,7 +60,6 @@ export function ConversationList({
           table: "messages",
         },
         () => {
-          // Refresh the page to get updated conversation list
           router.refresh();
         },
       )
@@ -70,7 +68,7 @@ export function ConversationList({
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [router]);
+  }, [router, instanceId]);
 
   if (conversations.length === 0) return null;
 

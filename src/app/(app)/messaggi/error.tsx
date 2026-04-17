@@ -3,7 +3,6 @@
 import Link from "next/link";
 
 export default function MessaggiError({
-  error,
   reset,
 }: {
   error: Error & { digest?: string };
@@ -16,11 +15,8 @@ export default function MessaggiError({
         Qualcosa è andato storto
       </h3>
       <p className="mt-2 text-sm text-ink/60 max-w-sm mx-auto">
-        {error.message || "Errore nel caricamento dei messaggi."}
+        Errore nel caricamento dei messaggi.
       </p>
-      {error.digest && (
-        <p className="mt-1 text-xs text-ink/30 font-mono">{error.digest}</p>
-      )}
       <div className="mt-4 flex items-center justify-center gap-3">
         <button onClick={reset} className="btn-gradient !py-2.5 !px-5 !text-sm">
           Riprova
